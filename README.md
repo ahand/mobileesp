@@ -54,6 +54,10 @@ Anthony updates the live demo pages when he updates the library. The live demo p
 - <a href="http://www.hand-interactive.com/detect/mobileesp_demo_javascript.htm">JavaScript Demo Page</a>
 
 
+##Useragent Test Strings
+The MobileESP project tests the PHP and JavaScript live demos with the included spreadsheet of useragent strings. This set of useragent strings isn't meant to be exhaustive, but rather to feature a wide variety of strings to verify that each of the DetectXXX() methods work as expected. Feel free to use this list of useragent strings on your own project, as well.
+
+
 ##Backstory
 This project maintains and extends the original code created in 2008 by Anthony Hand of Hand Interactive (<a href="http://www.hand-interactive.com">http://www.hand-interactive.com</a>). Anthony was working on a web site project for a client and wanted an easy way to customize some of the content for smartphones, especially that era's flagship iPhone, Symbian, and BlackBerry devices. However, commonly used Grep-style algorithms at the time were dumb, blunt force tools treating all devices as equal. Thus the PHP and JavaScript libraries were originally born.
 
