@@ -3,10 +3,10 @@
 
 [![Platform](https://img.shields.io/badge/platform-PHP-orange.svg?style=flat)](http://blog.mobileesp.com/?page_id=53)
 [![Platform](https://img.shields.io/badge/platform-Java-orange.svg?style=flat)](http://blog.mobileesp.com/?page_id=53)
-[![Platform](https://img.shields.io/badge/platform-JavaScript-orange.svg?style=flat)](http://blog.mobileesp.com/?page_id=53)
 [![Platform](https://img.shields.io/badge/platform-ASP.NET-orange.svg?style=flat)](http://blog.mobileesp.com/?page_id=53)
 [![Platform](https://img.shields.io/badge/platform-Python-orange.svg?style=flat)](http://blog.mobileesp.com/?page_id=53)
 [![Platform](https://img.shields.io/badge/platform-C++-orange.svg?style=flat)](http://blog.mobileesp.com/?page_id=53)
+[![Platform](https://img.shields.io/badge/platform-JavaScript-orange.svg?style=flat)](http://blog.mobileesp.com/?page_id=53)
 
 
 
@@ -62,6 +62,10 @@ This project maintains and extends the original code created in 2008 by Anthony 
 Anthony has a few items in the backlog and expects to make a minor update to the core MobileESP libraries by the end of April 2015. 
 
 The Ruby and Classic ASP (VBScript) libraries haven't been updated in years. Would anyone be interested in updating them?
+
+
+##License
+Apache v2.0. More info and the link to the Apache v2.0 license page in each code file. 
 
 
 ##Important Caveat
