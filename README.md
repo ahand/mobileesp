@@ -14,6 +14,9 @@ At last, a dead simple way for web site publishers to detect visitors on mobile 
 
 MobileESP is free, open source and lightweight. MobileESP has a simple API for detecting mobile devices. The API returns the simple Boolean result of TRUE if the device is the specified type, or FALSE if it isn't. For example, want to know if your visitor is on an iPhone, Android or Windows Phone device? Simply use the method DetectTierIphone(). It's that easy.
 
+Visit the MobileESP web site for tons more information: <a href="http://www.mobileesp.org">www.MobileESP.org</a>.
+
+
 ##Core Principles
 MobileESP believes in making it dead easy for a website publisher to detect mobile visitors. As a result, the API follows the DetectXXX() pattern and returns a simple Boolean (true or false) for the type of mobile device or platform desired. The API DetectXXX() methods are consistent by design across supported platforms. 
 
@@ -45,13 +48,26 @@ MobileESP is also available for JavaScript to be run in the browser. Support for
 A server-side library is recommended for pretty much everything else: from older smartphone OSes to all feature phones, plus smart TVs, gaming devices, and ereaders.
 
 
-##API Documentation
-- For the server-side libraries: 
-- For JavaScript: 
+##Live Demo
+Anthony updates the live demo pages when he updates the library. The live demo pages show the results of each of the API calls. Point your mobile device browser to the parent demo page: <a href="http://www.hand-interactive.com/detect/">http://www.hand-interactive.com/detect/</a>
+- <a href="http://www.hand-interactive.com/detect/mobileesp_demo_php.htm">PHP Demo Page</a>
+- <a href="http://www.hand-interactive.com/detect/mobileesp_demo_javascript.htm">JavaScript Demo Page</a>
 
 
+##Backstory
+This project maintains and extends the original code created in 2008 by Anthony Hand of Hand Interactive (<a href="http://www.hand-interactive.com">http://www.hand-interactive.com</a>). Anthony was working on a web site project for a client and wanted an easy way to customize some of the content for smartphones, especially that era's flagship iPhone, Symbian, and BlackBerry devices. However, commonly used Grep-style algorithms at the time were dumb, blunt force tools treating all devices as equal. Thus the PHP and JavaScript libraries were originally born.
 
 
+##Next Step...
+Anthony has a few items in the backlog and expects to make a minor update to the core MobileESP libraries by the end of April 2015. 
+
+The Ruby and Classic ASP (VBScript) libraries haven't been updated in years. Would anyone be interested in updating them?
 
 
+##Important Caveat
+The MobileESP project code is lightweight and ideal for many web sites. However, this project is not meant to replace other projects offering greater specificity and control, such as <a href="http://wurfl.sourceforge.net/">WURFL</a> or <a href="http://www.handsetdetection.com//">HandsetDetection.com</a>.
 
+
+##Donations
+Yes, usage of the MobileESP code is FREE, so no worries about that. But a donation to the cause helps provide motivation for Anthony to frequently update the code and continue to enhance the cross-platform APIs. And get new phones to do new tests with!
+> <a href="http://blog.mobileesp.com/?page_id=25">Donation Info</a>
