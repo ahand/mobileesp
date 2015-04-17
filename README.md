@@ -57,6 +57,8 @@ Anthony updates the live demo pages when he updates the library. The live demo p
 ##Backstory
 This project maintains and extends the original code created in 2008 by Anthony Hand of Hand Interactive (<a href="http://www.hand-interactive.com">http://www.hand-interactive.com</a>). Anthony was working on a web site project for a client and wanted an easy way to customize some of the content for smartphones, especially that era's flagship iPhone, Symbian, and BlackBerry devices. However, commonly used Grep-style algorithms at the time were dumb, blunt force tools treating all devices as equal. Thus the PHP and JavaScript libraries were originally born.
 
+NOTE: The MobileESP project was previously hosted on the Google Code web site. Because Google closed down that site and there had been many user requests, MobileESP is now hosted with GitHub. 
+
 
 ##Next Step...
 Anthony has a few items in the backlog and expects to make a minor update to the core MobileESP libraries by the end of April 2015. 
