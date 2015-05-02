@@ -85,6 +85,7 @@ class uagent_info
    var $deviceGoogleTV = 'googletv';
    var $deviceXoom = 'xoom'; //Motorola Xoom
    var $deviceHtcFlyer = 'htc_flyer'; //HTC Flyer
+   var $deviceGalaxyTab = 'sch-i800'; // Galaxy Tab
    
    var $deviceWinPhone7 = 'windows phone os 7'; 
    var $deviceWinPhone8 = 'windows phone 8'; 
@@ -364,7 +365,10 @@ class uagent_info
          return $this->false; 
       //Special check for the HTC Flyer 7" tablet. It should NOT report here.
       if ((stripos($this->useragent, $this->deviceHtcFlyer) > -1))
-         return $this->false; 
+         return $this->false;
+      //Special check for Galaxy Tab which is a tablet but contains 'Mobile' in the UA string
+      if ((stripos($this->useragent, $this->deviceGalaxyTab) > -1))
+         return $this->true;
          
       //Otherwise, if it's Android and does NOT have 'mobile' in it, Google says it's a tablet.
       if (stripos($this->useragent, $this->mobile) > -1)
