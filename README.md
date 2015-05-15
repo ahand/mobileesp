@@ -65,7 +65,7 @@ NOTE: The MobileESP project was previously hosted on the Google Code web site. B
 
 
 ##Next Step...
-Anthony has a few items in the backlog and expects to make a minor update to the core MobileESP libraries by the end of April 2015. 
+Anthony has a few items in the backlog and expects to make a minor update to the core MobileESP libraries by the end of May 2015. 
 
 The Ruby and Classic ASP (VBScript) libraries haven't been updated in years. Would anyone be interested in updating them?
 
