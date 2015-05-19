@@ -58,18 +58,20 @@ Anthony updates the live demo pages when he updates the library. The live demo p
 The MobileESP project tests the PHP and JavaScript live demos with the included spreadsheet of useragent strings. This set of useragent strings isn't meant to be exhaustive, but rather to feature a wide variety of strings to verify that each of the DetectXXX() methods work as expected. Feel free to use this list of useragent strings on your own project, as well.
 
 
-##Backstory
-This project maintains and extends the original code created in 2008 by Anthony Hand of Hand Interactive (<a href="http://www.hand-interactive.com">http://www.hand-interactive.com</a>). Anthony was working on a web site project for a client and wanted an easy way to customize some of the content for smartphones, especially that era's flagship iPhone, Symbian, and BlackBerry devices. However, commonly used Grep-style algorithms at the time were dumb, blunt force tools treating all devices as equal. Thus the PHP and JavaScript libraries were originally born.
-
-NOTE: The MobileESP project was previously hosted on the Google Code web site. Because Google closed down that site and there had been many user requests, MobileESP is now hosted with GitHub. 
-
-
 ##Updated May 2015!
 Anthony provided a much-needed update in May 2015. Please see the change log in the beginning of each file for full details. 
 
 Anthony tested the PHP and JavaScript libraries with the new useragent strings in the spreadsheet. However, Anthony doesn't have the environments set up to test the Java, C#, Python and C++ libraries. Can you help to test these? 
 
 In addition, the Ruby and Classic ASP (VBScript) libraries haven't been updated in several years. Would anyone be interested in updating them?
+
+##Python Question
+We've been notified that the Python library doesn't follow the Python community coding standards regarding method names in lower case with underscores separating elements rather than camel case. What do y'all think about this? Would it be better to conform to the Python standards or keep the method names consistent between libraries? Please let Anthony know. 
+
+##Backstory
+This project maintains and extends the original code created in 2008 by Anthony Hand of Hand Interactive (<a href="http://www.hand-interactive.com">http://www.hand-interactive.com</a>). Anthony was working on a web site project for a client and wanted an easy way to customize some of the content for smartphones, especially that era's flagship iPhone, Symbian, and BlackBerry devices. However, commonly used Grep-style algorithms at the time were dumb, blunt force tools treating all devices as equal. Thus the PHP and JavaScript libraries were originally born.
+
+NOTE: The MobileESP project was previously hosted on the Google Code web site. Because Google closed down that site and there had been many user requests, MobileESP is now hosted with GitHub. 
 
 
 ##License
