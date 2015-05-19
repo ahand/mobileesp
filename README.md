@@ -64,10 +64,12 @@ This project maintains and extends the original code created in 2008 by Anthony 
 NOTE: The MobileESP project was previously hosted on the Google Code web site. Because Google closed down that site and there had been many user requests, MobileESP is now hosted with GitHub. 
 
 
-##Next Step...
-Anthony has a few items in the backlog and expects to make a minor update to the core MobileESP libraries by the end of May 2015. 
+##Updated May 2015!
+Anthony provided a much-needed update in May 2015. Please see the change log in the beginning of each file for full details. 
 
-The Ruby and Classic ASP (VBScript) libraries haven't been updated in years. Would anyone be interested in updating them?
+Anthony tested the PHP and JavaScript libraries with the new useragent strings in the spreadsheet. However, Anthony doesn't have the environments set up to test the Java, C#, Python and C++ libraries. Can you help to test these? 
+
+In addition, the Ruby and Classic ASP (VBScript) libraries haven't been updated in several years. Would anyone be interested in updating them?
 
 
 ##License
