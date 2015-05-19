@@ -1,19 +1,42 @@
 /* *******************************************
-// Copyright 2010-2013, Anthony Hand
+// Copyright 2010-2015, Anthony Hand
 //
-// File version 2013.01.05 (January 5, 2013)
-//	Updates:
-//	- Added support for Tizen: variable and DetectTizen().
-//	- Added support for Meego: variable and DetectMeego().
-//	- Added support for Windows Phone 8: variable and DetectWindowsPhone8().
-//	- Added a generic Windows Phone method: DetectWindowsPhone().
-//	- Added support for BlackBerry 10 OS: variable and DetectBlackBerry10Phone().
-//	- Added support for PlayStation Vita handheld: variable and DetectGamingHandheld().
-//	- Updated DetectTierIphone(). Added Tizen; updated the Windows Phone, BB10, and PS Vita support. Removed 
-//	- Updated DetectWindowsMobile(). Uses generic DetectWindowsPhone() method rather than WP7.
-//	- Updated DetectSmartphone(). Uses the IsTierIphone variable.
-//	- Updated DetectSonyMylo() with more efficient code.
-//	- Removed DetectGarminNuvifone() from DetectTierIphone(). How many are left in market in 2013? It is detected as a RichCSS Tier device.
+//
+// File version 2015.05.13 (May 13, 2015)
+// Updates:
+//	- Moved MobileESP to GitHub. https://github.com/ahand/mobileesp
+//	- Opera Mobile/Mini browser has the same UA string on multiple platforms and doesn't differentiate phone vs. tablet. 
+//		- Removed DetectOperaAndroidPhone(). This method is no longer reliable. 
+//		- Removed DetectOperaAndroidTablet(). This method is no longer reliable. 
+//	- Added support for Windows Phone 10: variable and DetectWindowsPhone10()
+//	- Updated DetectWindowsPhone() to include WP10. 
+//	- Added support for Firefox OS.  
+//		- A variable plus DetectFirefoxOS(), DetectFirefoxOSPhone(), DetectFirefoxOSTablet()
+//		- NOTE: Firefox doesn't add UA tokens to definitively identify Firefox OS vs. their browsers on other mobile platforms.
+//	- Added support for Sailfish OS. Not enough info to add a tablet detection method at this time. 
+//		- A variable plus DetectSailfish(), DetectSailfishPhone()
+//	- Added support for Ubuntu Mobile OS. 
+//		- DetectUbuntu(), DetectUbuntuPhone(), DetectUbuntuTablet()
+//	- Added support for 2 smart TV OSes. They lack browsers but do have WebViews for use by HTML apps. 
+//		- One variable for Samsung Tizen TVs, plus DetectTizenTV()
+//		- One variable for LG WebOS TVs, plus DetectWebOSTV()
+//	- Updated DetectTizen(). Now tests for “mobile” to disambiguate from Samsung Smart TVs
+//	- Removed variables for obsolete devices: deviceHtcFlyer, deviceXoom.
+//	- Updated DetectAndroid(). No longer has a special test case for the HTC Flyer tablet. 
+//	- Updated DetectAndroidPhone(). 
+//		- Updated internal detection code for Android. 
+//		- No longer has a special test case for the HTC Flyer tablet. 
+//		- Checks against DetectOperaMobile() on Android and reports here if relevant. 
+//	- Updated DetectAndroidTablet(). 
+//		- No longer has a special test case for the HTC Flyer tablet. 
+//		- Checks against DetectOperaMobile() on Android to exclude it from here.
+//	- DetectMeego(): Changed definition for this method. Now detects any Meego OS device, not just phones. 
+//	- DetectMeegoPhone(): NEW. For Meego phones. Ought to detect Opera browsers on Meego, as well.  
+//	- DetectTierIphone(): Added support for phones running Sailfish, Ubuntu and Firefox Mobile. 
+//	- DetectTierTablet(): Added support for tablets running Ubuntu and Firefox Mobile. 
+//	- DetectSmartphone(): Added support for Meego phones. 
+//	- Refactored the detection logic in DetectMobileQuick() and DetectMobileLong().
+//		- Moved a few detection tests for older browsers to Long. 
 //
 //
 //
@@ -33,7 +56,7 @@
 //   Project Owner: Anthony Hand
 //   Email: anthony.hand@gmail.com
 //   Web Site: http://www.mobileesp.com
-//   Source Files: http://code.google.com/p/mobileesp/
+//   Source Files: https://github.com/ahand/mobileesp
 //
 //   Versions of this code are available for:
 //      PHP, JavaScript, Java, ASP.NET (C#), and Ruby
@@ -80,11 +103,10 @@ public class UAgentInfo {
     
     public static final String deviceAndroid = "android";
     public static final String deviceGoogleTV = "googletv";
-    public static final String deviceXoom = "xoom"; //Motorola Xoom
-    public static final String deviceHtcFlyer = "htc_flyer"; //HTC Flyer
     
     public static final String deviceWinPhone7 = "windows phone os 7";
     public static final String deviceWinPhone8 = "windows phone 8";
+    public static final String deviceWinPhone10 = "windows phone 10";
     public static final String deviceWinMob = "windows ce";
     public static final String deviceWindows = "windows";
     public static final String deviceIeMob = "iemobile";
@@ -110,13 +132,16 @@ public class UAgentInfo {
     public static final String deviceS90 = "series90";
     
     public static final String devicePalm = "palm";
-    public static final String deviceWebOS = "webos"; //For Palm's line of WebOS devices
+    public static final String deviceWebOS = "webos"; //For Palm devices
+    public static final String deviceWebOStv = "web0s"; //For LG TVs
     public static final String deviceWebOShp = "hpwos"; //For HP's line of WebOS devices
     
     public static final String deviceNuvifone = "nuvifone";  //Garmin Nuvifone
     public static final String deviceBada = "bada";  //Samsung's Bada OS
     public static final String deviceTizen = "tizen";  //Tizen OS
     public static final String deviceMeego = "meego";  //Meego OS
+    public static final String deviceSailfish = "sailfish"; //Sailfish OS
+    public static final String deviceUbuntu = "ubuntu"; //Ubuntu Mobile OS
 
     public static final String deviceKindle = "kindle";  //Amazon Kindle, eInk one
     public static final String engineSilk = "silk-accelerated";  //Amazon's accelerated Silk browser for Kindle Fire
@@ -141,6 +166,7 @@ public class UAgentInfo {
     public static final String deviceXbox = "xbox";
     public static final String deviceArchos = "archos";
     
+    public static final String engineFirefox = "firefox"; //For Firefox OS
     public static final String engineOpera = "opera"; //Popular browser
     public static final String engineNetfront = "netfront"; //Common embedded OS browser
     public static final String engineUpBrowser = "up.browser"; //common on some phones
@@ -153,6 +179,10 @@ public class UAgentInfo {
     public static final String mobile = "mobile"; //Some mobile browsers put "mobile" in their user agent strings.
     public static final String mobi = "mobi"; //Some mobile browsers put "mobi" in their user agent strings.
     
+    //Smart TV strings
+    public static final String smartTV1 = "smart-tv"; //Samsung Tizen smart TVs
+    public static final String smartTV2 = "smarttv"; //LG WebOS smart TVs
+
     //Use Maemo, Tablet, and Linux to test for Nokia"s Internet Tablets.
     public static final String maemo = "maemo";
     public static final String linux = "linux";
@@ -342,9 +372,7 @@ public class UAgentInfo {
         if ((userAgent.indexOf(deviceAndroid) != -1) ||
           detectGoogleTV()) 
             return true;
-        //Special check for the HTC Flyer 7" tablet. It should report here.
-        if (userAgent.indexOf(deviceHtcFlyer) != -1)
-            return true;
+        
         return false;
     }
 
@@ -356,14 +384,18 @@ public class UAgentInfo {
      * @return  detection of an Android phone
      */
     public boolean detectAndroidPhone() {
-        if (detectAndroid() && (userAgent.indexOf(mobile) != -1)) 
+        //First, let's make sure we're on an Android device.
+        if (!detectAndroid())
+			return false;
+
+        //If it's Android and has 'mobile' in it, Google says it's a phone.
+        if (userAgent.indexOf(mobile) != -1)
             return true;
-        //Special check for Android phones with Opera Mobile. They should report here.
-        if (detectOperaAndroidPhone()) 
+            
+        //Special check for Android devices with Opera Mobile/Mini. They should report here.
+        if (detectOperaMobile()) 
             return true;
-        //Special check for the HTC Flyer 7" tablet. It should report here.
-        if (userAgent.indexOf(deviceHtcFlyer) != -1) 
-            return true;
+        
         return false;
     }
 
@@ -377,11 +409,8 @@ public class UAgentInfo {
         if (!detectAndroid())
 			return false;
 
-        //Special check for Opera Android Phones. They should NOT report here.
+        //Special check for Android devices with Opera Mobile/Mini. They should NOT report here.
         if (detectOperaMobile()) 
-            return false;
-        //Special check for the HTC Flyer 7" tablet. It should NOT report here.
-        if (userAgent.indexOf(deviceHtcFlyer) != -1)
             return false;
     
         //Otherwise, if it's Android and does NOT have 'mobile' in it, Google says it's a tablet.
@@ -458,18 +487,20 @@ public class UAgentInfo {
     }
     
     /**
-     * Detects if the current browser is EITHER a Windows Phone 7.x OR 8 device
+     * Detects if the current browser is a Windows Phone 7.x, 8, or 10 device
      * @return detection of Windows Phone 7.x OR 8
      */
     public boolean detectWindowsPhone() {
-        if (detectWindowsPhone7() || detectWindowsPhone8()) {
+        if (detectWindowsPhone7() 
+        	|| detectWindowsPhone8()
+        	|| detectWindowsPhone10()) {
             return true;
         }
         return false;
     }
 
     /**
-     * Detects a Windows Phone 7.x device (in mobile browsing mode).
+     * Detects a Windows Phone 7 device (in mobile browsing mode).
      * @return detection of Windows Phone 7
      */
     public boolean detectWindowsPhone7() {
@@ -485,6 +516,17 @@ public class UAgentInfo {
      */
     public boolean detectWindowsPhone8() {
         if (userAgent.indexOf(deviceWinPhone8) != -1) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Detects a Windows Phone 10 device (in mobile browsing mode).
+     * @return detection of Windows Phone 10
+     */
+    public boolean detectWindowsPhone10() {
+        if (userAgent.indexOf(deviceWinPhone10) != -1) {
             return true;
         }
         return false;
@@ -680,6 +722,18 @@ public class UAgentInfo {
     }
 
     /**
+     * Detects if the current browser is on a WebOS smart TV.
+     * @return detection of a WebOS smart TV
+     */
+    public boolean detectWebOSTV() {
+        if (userAgent.indexOf(deviceWebOStv) != -1 && 
+                userAgent.indexOf(smartTV2) != -1) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Detects Opera Mobile or Opera Mini.
      * @return detection of an Opera browser for a mobile device
      */
@@ -687,32 +741,6 @@ public class UAgentInfo {
         if (userAgent.indexOf(engineOpera) != -1
                 && (userAgent.indexOf(mini) != -1
                 || userAgent.indexOf(mobi) != -1)) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Detects Opera Mobile on an Android phone.
-     * @return detection of an Opera browser on an Android phone
-     */
-    public boolean detectOperaAndroidPhone() {
-        if (userAgent.indexOf(engineOpera) != -1
-                && (userAgent.indexOf(deviceAndroid) != -1
-                && userAgent.indexOf(mobi) != -1)) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Detects Opera Mobile on an Android tablet.
-     * @return detection of an Opera browser on an Android tablet
-     */
-    public boolean detectOperaAndroidTablet() {
-        if (userAgent.indexOf(engineOpera) != -1
-                && (userAgent.indexOf(deviceAndroid) != -1
-                && userAgent.indexOf(deviceTablet) != -1)) {
             return true;
         }
         return false;
@@ -756,7 +784,7 @@ public class UAgentInfo {
     }
 
     /**
-     * Detects a device running the Bada smartphone OS from Samsung.
+     * Detects a device running the Bada OS from Samsung.
      * @return detection of a Bada device
      */
     public boolean detectBada() {
@@ -771,7 +799,20 @@ public class UAgentInfo {
      * @return detection of a Tizen device
      */
     public boolean detectTizen() {
-        if (userAgent.indexOf(deviceTizen) != -1) {
+        if (userAgent.indexOf(deviceTizen) != -1 && 
+                userAgent.indexOf(mobile) != -1) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Detects if the current browser is on a Tizen smart TV.
+     * @return detection of a Tizen smart TV
+     */
+    public boolean detectTizenTV() {
+        if (userAgent.indexOf(deviceTizen) != -1 && 
+                userAgent.indexOf(smartTV1) != -1) {
             return true;
         }
         return false;
@@ -787,6 +828,123 @@ public class UAgentInfo {
         }
         return false;
     }
+
+    /**
+     * Detects a phone running the Meego OS.
+     * @return detection of a Meego phone
+     */
+    public boolean detectMeegoPhone() {
+        if (userAgent.indexOf(deviceMeego) != -1 && 
+                userAgent.indexOf(mobi) != -1) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Detects a mobile device (probably) running the Firefox OS.
+     * @return detection of a Firefox OS mobile device
+     */
+    public boolean detectFirefoxOS() {
+        if (detectFirefoxOSPhone() || detectFirefoxOSTablet()) 
+            return true;
+        
+        return false;
+    }
+
+    /**
+     * Detects a phone (probably) running the Firefox OS.
+     * @return detection of a Firefox OS phone
+     */
+    public boolean detectFirefoxOSPhone() {
+        //First, let's make sure we're NOT on another major mobile OS.
+        if (detectIos() 
+        	|| detectAndroid()
+        	|| detectSailfish())
+            return false;
+        
+        if ((userAgent.indexOf(engineFirefox) != -1) 
+        	&& (userAgent.indexOf(mobile) != -1)) 
+            return true;
+        
+        return false;
+    }
+
+    /**
+     * Detects a tablet (probably) running the Firefox OS.
+     * @return detection of a Firefox OS tablet
+     */
+    public boolean detectFirefoxOSTablet() {
+        //First, let's make sure we're NOT on another major mobile OS.
+        if (detectIos() 
+        	|| detectAndroid()
+        	|| detectSailfish())
+            return false;
+        
+        if ((userAgent.indexOf(engineFirefox) != -1) 
+        	&& (userAgent.indexOf(deviceTablet) != -1)) 
+            return true;
+        
+        return false;
+    }
+
+    /**
+     * Detects a device running the Sailfish OS.
+     * @return detection of a Sailfish device
+     */
+    public boolean detectSailfish() {
+        if (userAgent.indexOf(deviceSailfish) != -1) {
+            return true;
+        }
+        return false;
+    }
+    
+    /**
+     * Detects a phone running the Sailfish OS.
+     * @return detection of a Sailfish phone
+     */
+    public boolean detectSailfishPhone() {
+        if (detectSailfish() && (userAgent.indexOf(mobile) != -1)) 
+            return true;
+        
+        return false;
+    }
+
+    /**
+     * Detects a mobile device running the Ubuntu Mobile OS.
+     * @return detection of an Ubuntu Mobile OS mobile device
+     */
+    public boolean detectUbuntu() {
+        if (detectUbuntuPhone() || detectUbuntuTablet()) 
+            return true;
+        
+        return false;
+    }
+
+    /**
+     * Detects a phone running the Ubuntu Mobile OS.
+     * @return detection of an Ubuntu Mobile OS phone
+     */
+    public boolean detectUbuntuPhone() {
+        if ((userAgent.indexOf(deviceUbuntu) != -1) 
+        	&& (userAgent.indexOf(mobile) != -1)) 
+            return true;
+        
+        return false;
+    }
+
+    /**
+     * Detects a tablet running the Ubuntu Mobile OS.
+     * @return detection of an Ubuntu Mobile OS tablet
+     */
+    public boolean detectUbuntuTablet() {
+        if ((userAgent.indexOf(deviceUbuntu) != -1) 
+        	&& (userAgent.indexOf(deviceTablet) != -1)) 
+            return true;
+        
+        return false;
+    }
+
 
     /**
      * Detects the Danger Hiptop device.
@@ -955,6 +1113,7 @@ public class UAgentInfo {
                 || detectSymbianOS()
                 || detectWindowsMobile()
                 || detectBlackBerry()
+                || detectMeegoPhone()
                 || detectPalmOS());
     }
 
@@ -974,37 +1133,29 @@ public class UAgentInfo {
             return true;
         }
 
-        if (detectWapWml()
-			|| detectBrewDevice()
-			|| detectOperaMobile()) {
-            return true;
-        }
-
-        if ((userAgent.indexOf(engineNetfront) != -1) 
-			|| (userAgent.indexOf(engineUpBrowser) != -1) 
-			|| (userAgent.indexOf(engineOpenWeb) != -1)) {
-            return true;
-        }
-
-        if (detectDangerHiptop()
-			|| detectMidpCapable()
-			|| detectMaemoTablet()
-			|| detectArchos()) {
-            return true;
-        }
-
-        if ((userAgent.indexOf(devicePda) != -1) &&
-			(userAgent.indexOf(disUpdate) < 0)) //no index found
-        {
-            return true;
-        }
+        //Catch-all for many mobile devices
         if (userAgent.indexOf(mobile) != -1) {
+            return true;
+        }
+
+        if (detectOperaMobile()) {
             return true;
         }
 
         //We also look for Kindle devices
         if (detectKindle()
-                        || detectAmazonSilk()) {
+            || detectAmazonSilk()) {
+            return true;
+        }
+
+        if (detectWapWml()
+			|| detectMidpCapable()
+			|| detectBrewDevice()) {
+            return true;
+        }
+
+        if ((userAgent.indexOf(engineNetfront) != -1) 
+			|| (userAgent.indexOf(engineUpBrowser) != -1)) {
             return true;
         }
 
@@ -1022,35 +1173,36 @@ public class UAgentInfo {
      */
     public boolean detectMobileLong() {
         if (detectMobileQuick()
-                || detectGameConsole()
-                || detectSonyMylo()) {
+                || detectGameConsole()) {
             return true;
         }
 
-        //detect older phones from certain manufacturers and operators.
-        if (userAgent.indexOf(uplink) != -1) {
-            return true;
-        }
-        if (userAgent.indexOf(manuSonyEricsson) != -1) {
-            return true;
-        }
-        if (userAgent.indexOf(manuericsson) != -1) {
-            return true;
-        }
-        if (userAgent.indexOf(manuSamsung1) != -1) {
+        if (detectDangerHiptop()
+			|| detectMaemoTablet()
+            || detectSonyMylo()
+			|| detectArchos()) {
             return true;
         }
 
-        if (userAgent.indexOf(svcDocomo) != -1) {
-            return true;
-        }
-        if (userAgent.indexOf(svcKddi) != -1) {
-            return true;
-        }
-        if (userAgent.indexOf(svcVodafone) != -1) {
+        if ((userAgent.indexOf(devicePda) != -1) &&
+			(userAgent.indexOf(disUpdate) < 0)) //no index found
+        {
             return true;
         }
 
+        //Detect older phones from certain manufacturers and operators.
+        if ((userAgent.indexOf(uplink) != -1) 
+        	|| (userAgent.indexOf(engineOpenWeb) != -1) 
+        	|| (userAgent.indexOf(manuSamsung1) != -1)
+        	|| (userAgent.indexOf(manuSonyEricsson) != -1)
+        	|| (userAgent.indexOf(manuericsson) != -1)
+        	|| (userAgent.indexOf(svcDocomo) != -1)
+        	|| (userAgent.indexOf(svcKddi) != -1)
+        	|| (userAgent.indexOf(svcVodafone) != -1))
+        	{
+            	return true;
+        	}
+        
         return false;
     }
 
@@ -1069,6 +1221,8 @@ public class UAgentInfo {
         if (detectIpad()
                 || detectAndroidTablet()
                 || detectBlackBerryTablet()
+                || detectFirefoxOSTablet()
+                || detectUbuntuTablet()
                 || detectWebOSTablet()) {
             return true;
         }
@@ -1092,6 +1246,9 @@ public class UAgentInfo {
                 || detectPalmWebOS()
                 || detectBada()
                 || detectTizen()
+                || detectFirefoxOSPhone()
+                || detectSailfishPhone()
+                || detectUbuntuPhone()
                 || detectGamingHandheld()) {
             return true;
         }
@@ -1112,7 +1269,7 @@ public class UAgentInfo {
 		//Note: 'High' BlackBerry devices ONLY
 		if (detectMobileQuick()) {
 
-                        //Exclude iPhone Tier and e-Ink Kindle devices.
+            //Exclude iPhone Tier and e-Ink Kindle devices.
 			if (!detectTierIphone() && !detectKindle()) {
 
 				//The following devices are explicitly ok.
@@ -1122,8 +1279,7 @@ public class UAgentInfo {
 					|| detectS60OssBrowser()
 					|| detectBlackBerryHigh()
 					|| detectWindowsMobile()
-					|| userAgent.indexOf(engineTelecaQ) !=
-					-1) {
+					|| userAgent.indexOf(engineTelecaQ) != -1) {
 					   result= true;
 				} // if detectWebkit()
 			} //if !detectTierIphone()

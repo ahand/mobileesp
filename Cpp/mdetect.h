@@ -1,5 +1,46 @@
 /* *******************************************
-// Copyright 2010-2014, Anthony Hand
+// Copyright 2010-2015, Anthony Hand
+//
+//
+// File version 2015.05.13 (May 13, 2015)
+// Updates:
+//	- Moved MobileESP to GitHub. https://github.com/ahand/mobileesp
+//	- Opera Mobile/Mini browser has the same UA string on multiple platforms and doesn't differentiate phone vs. tablet. 
+//		- Removed DetectOperaAndroidPhone(). This method is no longer reliable. 
+//		- Removed DetectOperaAndroidTablet(). This method is no longer reliable. 
+//	- Added support for Windows Phone 10: variable and DetectWindowsPhone10()
+//	- Updated DetectWindowsPhone() to include WP10. 
+//	- Added support for Firefox OS.  
+//		- A variable plus DetectFirefoxOS(), DetectFirefoxOSPhone(), DetectFirefoxOSTablet()
+//		- NOTE: Firefox doesn't add UA tokens to definitively identify Firefox OS vs. their browsers on other mobile platforms.
+//	- Added support for Sailfish OS. Not enough info to add a tablet detection method at this time. 
+//		- A variable plus DetectSailfish(), DetectSailfishPhone()
+//	- Added support for Ubuntu Mobile OS. 
+//		- DetectUbuntu(), DetectUbuntuPhone(), DetectUbuntuTablet()
+//	- Added support for 2 smart TV OSes. They lack browsers but do have WebViews for use by HTML apps. 
+//		- One variable for Samsung Tizen TVs, plus DetectTizenTV()
+//		- One variable for LG WebOS TVs, plus DetectWebOSTV()
+//	- Updated DetectTizen(). Now tests for “mobile” to disambiguate from Samsung Smart TVs
+//	- Removed variables for obsolete devices: deviceHtcFlyer, deviceXoom.
+//	- Updated DetectAndroid(). No longer has a special test case for the HTC Flyer tablet. 
+//	- Updated DetectAndroidPhone(). 
+//		- Updated internal detection code for Android. 
+//		- No longer has a special test case for the HTC Flyer tablet. 
+//		- Checks against DetectOperaMobile() on Android and reports here if relevant. 
+//	- Updated DetectAndroidTablet(). 
+//		- No longer has a special test case for the HTC Flyer tablet. 
+//		- Checks against DetectOperaMobile() on Android to exclude it from here.
+//	- DetectMeego(): Changed definition for this method. Now detects any Meego OS device, not just phones. 
+//	- DetectMeegoPhone(): NEW. For Meego phones. Ought to detect Opera browsers on Meego, as well.  
+//	- DetectTierIphone(): Added support for phones running Sailfish, Ubuntu and Firefox Mobile. 
+//	- DetectTierTablet(): Added support for tablets running Ubuntu and Firefox Mobile. 
+//	- DetectSmartphone(): Added support for Meego phones. 
+//	- Removed the variable for Obigo, an embedded browser. The browser is on old devices. 
+//		- Couldn’t find info on current Obigo embedded browser user agent strings.
+//	- Refactored the detection logic in DetectMobileQuick() and DetectMobileLong().
+//		- Moved a few detection tests for older browsers to Long. 
+//
+//
 //
 // File version 2014.01.24 (January 24, 2014)
 //	Updates:
@@ -23,7 +64,7 @@
 //   Project Owner: Anthony Hand
 //   Email: anthony.hand@gmail.com
 //   Web Site: http://www.mobileesp.com
-//   Source Files: http://code.google.com/p/mobileesp/
+//   Source Files: https://github.com/ahand/mobileesp
 //   
 //   Versions of this code are available for:
 //      PHP, JavaScript, Java, ASP.NET (C#), C++, and Ruby
@@ -54,6 +95,7 @@ namespace MobileESP
    
    const string deviceWinPhone7 = "windows phone os 7"; 
    const string deviceWinPhone8 = "windows phone 8"; 
+   const string deviceWinPhone10 = "windows phone 10"; 
    const string deviceWinMob = "windows ce";
    const string deviceWindows = "windows"; 
    const string deviceIeMob = "iemobile";
@@ -79,8 +121,10 @@ namespace MobileESP
    const string deviceS90 = "series90";
    
    const string devicePalm = "palm";
-   const string deviceWebOS = "webos"; //For Palm's line of WebOS devices
+   const string deviceWebOS = "webos"; //For Palm devices
+   const string deviceWebOStv = "web0s"; //For LG TVs
    const string deviceWebOShp = "hpwos"; //For HP's line of WebOS devices
+   
    const string engineBlazer = "blazer"; //Old Palm browser
    const string engineXiino = "xiino"; //Another old Palm
    
@@ -88,6 +132,8 @@ namespace MobileESP
    const string deviceBada = "bada"; //Samsung's Bada OS
    const string deviceTizen = "tizen"; //Tizen OS
    const string deviceMeego = "meego"; //Meego OS
+   const string deviceSailfish = "sailfish"; //Sailfish OS
+   const string deviceUbuntu = "ubuntu"; //Ubuntu Mobile OS
 
    const string deviceKindle = "kindle"; //Amazon Kindle, eInk one
    const string engineSilk = "silk-accelerated"; //Amazon's accelerated Silk browser for Kindle Fire
@@ -109,6 +155,7 @@ namespace MobileESP
    const string deviceXbox = "xbox";
    const string deviceArchos = "archos";
    
+   const string engineFirefox = "firefox"; //For Firefox OS
    const string engineOpera = "opera"; //Popular browser
    const string engineNetfront = "netfront"; //Common embedded OS browser
    const string engineUpBrowser = "up.browser"; //common on some phones
@@ -116,13 +163,16 @@ namespace MobileESP
    const string deviceMidp = "midp"; //a mobile Java technology
    const string uplink = "up.link";
    const string engineTelecaQ = "teleca q"; //a modern feature phone browser
-   const string engineObigo = "obigo"; //W 10 is a modern feature phone browser
    
    const string devicePda = "pda"; //some devices report themselves as PDAs
    const string mini = "mini";  //Some mobile browsers put 'mini' in their names.
    const string mobile = "mobile"; //Some mobile browsers put 'mobile' in their user agent strings.
    const string mobi = "mobi"; //Some mobile browsers put 'mobi' in their user agent strings.
    
+   //Smart TV strings
+   const string smartTV1 = "smart-tv"; //Samsung Tizen smart TVs
+   const string smartTV2 = "smarttv"; //LG WebOS smart TVs
+
    //Use Maemo, Tablet, and Linux to test for Nokia's Internet Tablets.
    const string maemo = "maemo";
    const string llinux = "linux";
@@ -313,11 +363,8 @@ public:
       if ((useragent.find( MobileESP::deviceAndroid) != std::string::npos)
           || (DetectGoogleTV() == true))
          return true; 
-      //Special check for the HTC Flyer 7" tablet
-      if ((useragent.find( MobileESP::deviceHtcFlyer) != std::string::npos))
-         return true; 
-      else
-         return false; 
+         
+      return false; 
    }
 
    //**************************
@@ -331,19 +378,19 @@ public:
           isAndroidPhone == true)
          return isAndroidPhone;
 
-      if ((DetectAndroid() == true) &&
-		(useragent.find( MobileESP::mobile) != std::string::npos))
-         return true;
-      
-      //Special check for Android phones with Opera Mobile. They should report here.
-      if ((DetectOperaAndroidPhone() == true))
-         return true; 
-      //Special check for the HTC Flyer 7" tablet. It should report here.
-      if ((useragent.find( MobileESP::deviceHtcFlyer) != std::string::npos))
-         return true;
-      
-      else
+      //First, let's make sure we're on an Android device.
+      if (DetectAndroid() == false)
          return false; 
+
+      //If it's Android and has 'mobile' in it, Google says it's a phone.
+      if (useragent.find( MobileESP::mobile) != std::string::npos)
+         return true;
+      
+      //Special check for Android devices with Opera Mobile/Mini. They should report here.
+      if ((DetectOperaMobile() == true))
+         return true; 
+
+      return false; 
    }
 
    //**************************
@@ -355,18 +402,15 @@ public:
       if (DetectAndroid() == false)
          return false; 
 
-      //Special check for Opera Android Phones. They should NOT report here.
+      //Special check for Android devices with Opera Mobile/Mini. They should NOT report here.
       if (DetectOperaMobile() == true)
-         return false; 
-      //Special check for the HTC Flyer 7" tablet. It should NOT report here.
-      if ((useragent.find( MobileESP::deviceHtcFlyer) != std::string::npos))
          return false; 
          
       //Otherwise, if it's Android and does NOT have 'mobile' in it, Google says it's a tablet.
       if (useragent.find( MobileESP::mobile) != std::string::npos)
          return false;
-      else
-         return true; 
+         
+      return true; 
    }
 
    //**************************
@@ -407,19 +451,20 @@ public:
 
 
    //**************************
-   // Detects if the current browser is EITHER a 
-   // Windows Phone 7.x OR 8 device.
+   // Detects if the current browser is a 
+   // Windows Phone 7, 8, or 10 device.
    bool DetectWindowsPhone()
    {
-      if ((DetectWindowsPhone8() == true)
-			|| (DetectWindowsPhone7() == true))
+      if ((DetectWindowsPhone7() == true)
+			|| (DetectWindowsPhone8() == true)
+			|| (DetectWindowsPhone10() == true))
          return true; 
       else
          return false; 
    }
    
    //**************************
-   // Detects a Windows Phone 7.x device (in mobile browsing mode).
+   // Detects a Windows Phone 7 device (in mobile browsing mode).
    bool DetectWindowsPhone7()
    {
       if (useragent.find( MobileESP::deviceWinPhone7) != std::string::npos)
@@ -433,6 +478,16 @@ public:
    bool DetectWindowsPhone8()
    {
       if (useragent.find( MobileESP::deviceWinPhone8) != std::string::npos)
+         return true; 
+      else
+         return false; 
+   }
+
+   //**************************
+   // Detects a Windows Phone 10 device (in mobile browsing mode).
+   bool DetectWindowsPhone10()
+   {
+      if (useragent.find( MobileESP::deviceWinPhone10) != std::string::npos)
          return true; 
       else
          return false; 
@@ -654,7 +709,16 @@ public:
          return false; 
    }
 
-
+   //**************************
+   // Detects if the current browser is on a WebOS smart TV.
+   bool DetectWebOSTV()
+   {
+      if ((useragent.find( MobileESP::deviceWebOStv) != std::string::npos)
+			&& (useragent.find( MobileESP::smartTV2) != std::string::npos))
+         return true; 
+      else
+         return false; 
+   }
 
    //**************************
    // Detects if the current browser is Opera Mobile or Mini.
@@ -668,32 +732,6 @@ public:
          else
             return false; 
       }
-      else
-         return false; 
-   }
-
-   //**************************
-   // Detects if the current browser is Opera Mobile
-   // running on an Android phone.
-   bool DetectOperaAndroidPhone()
-   {
-      if ((useragent.find( MobileESP::engineOpera) != std::string::npos) &&
-        (useragent.find( MobileESP::deviceAndroid) != std::string::npos) &&
-		(useragent.find( MobileESP::mobi) != std::string::npos))
-         return true; 
-      else
-         return false; 
-   }
-
-   //**************************
-   // Detects if the current browser is Opera Mobile
-   // running on an Android tablet.  
-   bool DetectOperaAndroidTablet()
-   {
-      if ((useragent.find( MobileESP::engineOpera) != std::string::npos) &&
-        (useragent.find( MobileESP::deviceAndroid) != std::string::npos) &&
-		(useragent.find( MobileESP::deviceTablet) != std::string::npos))
-         return true; 
       else
          return false; 
    }
@@ -745,7 +783,19 @@ public:
    // Detects a device running the Tizen smartphone OS.
    bool DetectTizen()
    {
-      if (useragent.find( MobileESP::deviceTizen) != std::string::npos)
+      if ((useragent.find( MobileESP::deviceTizen) != std::string::npos)
+			&& (useragent.find( MobileESP::mobile) != std::string::npos))
+         return true; 
+      else
+         return false; 
+   }
+   
+    //**************************
+   // Detects if the current browser is on a Tizen smart TV.
+   bool DetectTizenTV()
+   {
+      if ((useragent.find( MobileESP::deviceTizen) != std::string::npos)
+			&& (useragent.find( MobileESP::smartTV1) != std::string::npos))
          return true; 
       else
          return false; 
@@ -759,6 +809,114 @@ public:
          return true; 
       else
          return false; 
+   }
+   
+    //**************************
+   // Detects a phone running the Meego OS.
+   bool DetectMeegoPhone()
+   {
+      if ((useragent.find( MobileESP::deviceMeego) != std::string::npos)
+			&& (useragent.find( MobileESP::mobi) != std::string::npos))
+         return true; 
+      else
+         return false; 
+   }
+
+   //**************************
+   // Detects a mobile device (probably) running the Firefox OS.
+   bool DetectFirefoxOS()
+   {
+      if ((DetectFirefoxOSPhone() == true) || DetectFirefoxOSTablet())
+         return true;
+      
+      return false; 
+   }
+
+   //**************************
+   // Detects a phone (probably) running the Firefox OS.
+   bool DetectFirefoxOSPhone()
+   {
+      //First, let's make sure we're NOT on another major mobile OS.
+      if (DetectIos() || 
+      	DetectAndroid() || 
+      	DetectSailfish())
+         return false;
+            
+      if ((useragent.find( MobileESP::engineFirefox) != std::string::npos) &&
+		(useragent.find( MobileESP::mobile) != std::string::npos))
+         return true;
+      
+      return false; 
+   }
+
+   //**************************
+   // Detects a tablet (probably) running the Firefox OS.
+   bool DetectFirefoxOSTablet()
+   {
+      //First, let's make sure we're NOT on another major mobile OS.
+      if (DetectIos() || 
+      	DetectAndroid() || 
+      	DetectSailfish())
+         return false;
+            
+      if ((useragent.find( MobileESP::engineFirefox) != std::string::npos) &&
+		(useragent.find( MobileESP::deviceTablet) != std::string::npos))
+         return true;
+      
+      return false; 
+   }
+
+   //**************************
+   // Detects a device running the Sailfish OS.
+   bool DetectSailfish()
+   {
+      if (useragent.find( MobileESP::deviceSailfish) != std::string::npos)
+         return true; 
+      else
+         return false; 
+   }
+
+   //**************************
+   // Detects a phone running the Sailfish OS.
+   bool DetectSailfishPhone()
+   {
+      if ((DetectSailfish() == true) &&
+		(useragent.find( MobileESP::mobile) != std::string::npos))
+         return true;
+      
+      return false; 
+   }
+
+   //**************************
+   // Detects a mobile device running the Ubuntu Mobile OS.
+   bool DetectUbuntu()
+   {
+      if ((DetectUbuntuPhone() == true) || DetectUbuntuTablet() == true)
+         return true;
+      
+      return false; 
+   }
+
+   //**************************
+   // Detects a phone running the Ubuntu Mobile OS.
+   bool DetectUbuntuPhone()
+   {
+      if ((useragent.find( MobileESP::deviceUbuntu) != std::string::npos) &&
+		(useragent.find( MobileESP::mobile) != std::string::npos))
+         return true;
+      
+      return false; 
+   }
+
+   //**************************
+   // Detects a tablet running the Ubuntu Mobile OS.
+   bool DetectUbuntuTablet()
+   {
+      if ((useragent.find( MobileESP::deviceUbuntu) != std::string::npos) &&
+		(useragent.find( MobileESP::deviceTablet) != std::string::npos))
+         return true;
+      
+      return false; 
    }
    
    //**************************
@@ -916,6 +1074,7 @@ public:
 		|| (DetectSymbianOS() == true) 
 		|| (DetectWindowsMobile() == true)
 		|| (DetectBlackBerry() == true)
+		|| (DetectMeegoPhone() == true)
 		|| (DetectPalmWebOS() == true))
          return true; 
       else
@@ -928,47 +1087,39 @@ public:
    //   as well as smartphone-class devices. Excludes Apple iPads and other modern tablets.
    bool DetectMobileQuick()
    {
-      //Let's exclude tablets
-      if (isTierTablet == true) 
-         return false;
-      
       if (initCompleted == true ||
           isMobilePhone == true)
          return isMobilePhone;
 
+      //Let's exclude tablets
+      if (isTierTablet == true) 
+         return false;
+      
       //Most mobile browsing is done on smartphones
       if (DetectSmartphone() == true) 
          return true;
 
-       if (useragent.find( MobileESP::mobile) != std::string::npos)
+      //Catch-all for many mobile devices
+      if (useragent.find( MobileESP::mobile) != std::string::npos)
          return true; 
 
-      if ((DetectWapWml() == true) 
-			|| (DetectBrewDevice() == true) 
-			|| (DetectOperaMobile() == true))
+      if (DetectOperaMobile() == true)
          return true;
-         
-      if ((useragent.find( MobileESP::engineObigo) != std::string::npos)
-			|| (useragent.find( MobileESP::engineNetfront) != std::string::npos)
-			|| (useragent.find( MobileESP::engineUpBrowser) != std::string::npos)
-			|| (useragent.find( MobileESP::engineOpenWeb) != std::string::npos))
-         return true; 
-         
-      if ((DetectDangerHiptop() == true) 
-			|| (DetectMidpCapable() == true) 
-			|| (DetectMaemoTablet() == true) 
-			|| (DetectArchos() == true))
-         return true; 
 
-       if ((useragent.find( MobileESP::devicePda) != std::string::npos) &&
-		 !(useragent.find( MobileESP::disUpdate) != std::string::npos))
-         return true;
-      
       //We also look for Kindle devices
       if (DetectKindle() == true ||
          DetectAmazonSilk() == true) 
          return true;
 
+      if ((DetectWapWml() == true) 
+			|| (DetectMidpCapable() == true) 
+			|| (DetectBrewDevice() == true))
+         return true;
+         
+      if ((useragent.find( MobileESP::engineNetfront) != std::string::npos)
+			|| (useragent.find( MobileESP::engineUpBrowser) != std::string::npos))
+         return true; 
+         
       else
          return false; 
    }
@@ -986,28 +1137,29 @@ public:
          return true; 
       if (DetectGameConsole() == true) 
          return true; 
-      if (DetectSonyMylo() == true) 
+         
+      if ((DetectDangerHiptop() == true) 
+			|| (DetectMaemoTablet() == true)
+			|| (DetectSonyMylo() == true)
+			|| (DetectArchos() == true))
          return true; 
 
+       if ((useragent.find( MobileESP::devicePda) != std::string::npos) &&
+		 !(useragent.find( MobileESP::disUpdate) != std::string::npos))
+         return true;
+      
        //Detect older phones from certain manufacturers and operators. 
-       if (useragent.find( MobileESP::uplink) != std::string::npos)
-         return true; 
-       if (useragent.find( MobileESP::manuSonyEricsson) != std::string::npos)
-         return true; 
-       if (useragent.find( MobileESP::manuericsson) != std::string::npos)
-         return true; 
-       if (useragent.find( MobileESP::manuSamsung1) != std::string::npos)
-         return true; 
+       if ((useragent.find( MobileESP::uplink) != std::string::npos)
+       		|| (useragent.find( MobileESP::engineOpenWeb) != std::string::npos)
+       		|| (useragent.find( MobileESP::manuSamsung1) != std::string::npos)
+       		|| (useragent.find( MobileESP::manuSonyEricsson) != std::string::npos)
+       		|| (useragent.find( MobileESP::manuericsson) != std::string::npos)
+       		|| (useragent.find( MobileESP::svcDocomo) != std::string::npos)
+       		|| (useragent.find( MobileESP::svcKddi) != std::string::npos)
+       		|| (useragent.find( MobileESP::svcVodafone) != std::string::npos))
+         return true;
 
-       if (useragent.find( MobileESP::svcDocomo) != std::string::npos)
-         return true; 
-       if (useragent.find( MobileESP::svcKddi) != std::string::npos)
-         return true; 
-       if (useragent.find( MobileESP::svcVodafone) != std::string::npos)
-         return true; 
-
-      else
-         return false; 
+       return false; 
    }
 
 
@@ -1029,6 +1181,8 @@ public:
       if ((DetectIpad() == true) 
          || (DetectAndroidTablet() == true) 
          || (DetectBlackBerryTablet() == true) 
+         || (DetectFirefoxOSTablet() == true)
+         || (DetectUbuntuTablet() == true)
          || (DetectWebOSTablet() == true))
          return true; 
       else
@@ -1054,6 +1208,9 @@ public:
 			|| (DetectPalmWebOS() == true)
 			|| (DetectBada() == true)
 			|| (DetectTizen() == true)
+			|| (DetectFirefoxOSPhone() == true)
+			|| (DetectSailfishPhone() == true)
+			|| (DetectUbuntuPhone() == true)
 			|| (DetectGamingHandheld() == true))
          return true; 
       

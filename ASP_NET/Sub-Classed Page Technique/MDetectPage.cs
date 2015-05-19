@@ -1,45 +1,53 @@
 ﻿/* *******************************************
-// Copyright 2010-2012, Anthony Hand
+// Copyright 2010-2015, Anthony Hand
 //
-// File version date: May 16, 2012
-//		Update:
-//		- Updated vndRIM: The starting quote was missing.  
-//		- Removed the class statement, "using System.Linq." The class wasn't actually used.
-//		  Removing the Linq statement brings compatibility for the ASP.NET code to .NET 2.0.   
 //
-// File version date: April 23, 2012
-//		Update:
-//		- Updated DetectAmazonSilk(): Fixed an issue in the detection logic.  
-//
-// File version date: April 22, 2012 - Second update
-//		Update: To address additional Kindle issues...
-//		- Updated DetectRichCSS(): Excluded e-Ink Kindle devices. 
-//		- Created DetectAmazonSilk(): Created to detect Kindle Fire devices in Silk mode. 
-//		- Updated DetectMobileQuick(): Updated to include e-Ink Kindle devices and the Kindle Fire in Silk mode.  
-//
-// File version date: April 11, 2012
-//		Update: 
-//		- Added a new variable for the new BlackBerry Curve Touch (9380): deviceBBCurveTouch. 
-//		- Updated DetectBlackBerryTouch() to support the new BlackBerry Curve Touch (9380). 
-//
-// File version date: January 21, 2012, part 2
-//		Update: 
-//		- Made numerous enhancements to improve code performance.   
-//		- Variables: Converted the private member strings to constants for faster object creation.   
-//		- Removed unused properties: deviceXoom.   
-//		- Wrote member strings in UPPERCASE rather than calling the ToUpper() on each one.   
-//		- Added a note to OnInit() that one may optionally override InitializeCulture() instead.   
-//
-// File version date: January 21, 2012, part 1
-//		Update: 
-//		- Moved Windows Phone 7 to the iPhone Tier. WP7.5's IE 9-based browser is good enough now.  
-//		- Added a new variable for 2 versions of the new BlackBerry Bold Touch (9900 and 9930): deviceBBBoldTouch. 
-//		- Updated DetectBlackBerryTouch() to support the 2 versions of the new BlackBerry Bold Touch (9900 and 9930). 
-//		- Updated DetectKindle() to focus on eInk devices only. The Kindle Fire should be detected as a regular Android device.
-//
-// File version date: August 22, 2011
-//		Update: 
-//		- Updated DetectAndroidTablet() to fix a bug introduced in the last fix! The true/false returns were mixed up. 
+// File version 2015.05.13 (May 13, 2015)
+// Updates:
+//	- Moved MobileESP to GitHub. https://github.com/ahand/mobileesp
+//	- Opera Mobile/Mini browser has the same UA string on multiple platforms and doesn't differentiate phone vs. tablet. 
+//		- Removed DetectOperaAndroidPhone(). This method is no longer reliable. 
+//		- Removed DetectOperaAndroidTablet(). This method is no longer reliable. 
+//	- Added support for Windows Phone 10: variable and DetectWindowsPhone10()
+//	- Updated DetectWindowsPhone() to include WP10. 
+//	- Added support for Firefox OS.  
+//		- A variable plus DetectFirefoxOS(), DetectFirefoxOSPhone(), DetectFirefoxOSTablet()
+//		- NOTE: Firefox doesn't add UA tokens to definitively identify Firefox OS vs. their browsers on other mobile platforms.
+//	- Added support for Sailfish OS. Not enough info to add a tablet detection method at this time. 
+//		- A variable plus DetectSailfish(), DetectSailfishPhone()
+//	- Added support for Ubuntu Mobile OS. 
+//		- DetectUbuntu(), DetectUbuntuPhone(), DetectUbuntuTablet()
+//	- Added support for 2 smart TV OSes. They lack browsers but do have WebViews for use by HTML apps. 
+//		- One variable for Samsung Tizen TVs, plus DetectTizenTV()
+//		- One variable for LG WebOS TVs, plus DetectWebOSTV()
+//	- Added DetectTizen(). Tests for “mobile” to disambiguate from Samsung Smart TVs.
+//	- Removed variables for obsolete devices: deviceHtcFlyer, deviceXoom.
+//	- Updated DetectAndroid(). No longer has a special test case for the HTC Flyer tablet. 
+//	- Updated DetectAndroidPhone(). 
+//		- Updated internal detection code for Android. 
+//		- No longer has a special test case for the HTC Flyer tablet. 
+//		- Checks against DetectOperaMobile() on Android and reports here if relevant. 
+//	- Updated DetectAndroidTablet(). 
+//		- No longer has a special test case for the HTC Flyer tablet. 
+//		- Checks against DetectOperaMobile() on Android to exclude it from here.
+//	- DetectMeego(): Changed definition for this method. Now detects any Meego OS device, not just phones. 
+//	- DetectMeegoPhone(): NEW. For Meego phones. Ought to detect Opera browsers on Meego, as well.  
+//	- DetectTierIphone(): Added support for phones running Sailfish, Ubuntu and Firefox Mobile. 
+//	- DetectTierTablet(): Added support for tablets running Ubuntu and Firefox Mobile. 
+//	- DetectSmartphone(): Added support for Meego phones. 
+//	- Caught this library up to the PHP, JavaScript and Java versions. Updates include: 
+//		- Added support for Bada: a variable and DetectBada(). This detects any Bada OS device, but (almost) all are phones.
+//		- Refactored the Windows Phone delegate-related properties and features. Now fires for any Windows Phone, not just WP7. 
+//			- The event fires now when DetectWindowsPhone() is true. 
+//		- Added support for Windows Phone 8: DetectWindowsPhone8().
+//		- Updated DetectWindowsMobile(). Excludes any Windows Phone device, not just WP7. 
+//		- Added support for BlackBerry 10 OS phones: DetectBlackBerry10Phone().
+//		- Updated DetectSonyMylo().
+//		- Updated DetectSmartphone() to sync with the other libraries. 
+//		- Updated DetectTierIphone() to sync with the other libraries.
+//		- OnInit(EventArgs e): Fixed the user agent and httpaccept init logic.
+//	- Refactored the detection logic in DetectMobileQuick() and DetectMobileLong().
+//		- Moved a few detection tests for older browsers to Long. 
 //
 //
 //
@@ -59,7 +67,7 @@
 //   Project Owner: Anthony Hand
 //   Email: anthony.hand@gmail.com
 //   Web Site: http://www.mobileesp.com
-//   Source Files: http://code.google.com/p/mobileesp/
+//   Source Files: https://github.com/ahand/mobileesp
 //   
 //   Versions of this code are available for:
 //      PHP, JavaScript, Java, ASP.NET (C#), and Ruby
@@ -98,7 +106,7 @@ public class MDetectPage : System.Web.UI.Page
     private const string dargsWebKit = "webkit";
     private const string dargsSymbianOS = "symbianos";
     private const string dargsS60 = "series60";
-    private const string dargsWindowsPhone7 = "windowsphone7";
+    private const string dargsWindowsPhone = "windowsphone";
     private const string dargsWindowsMobile = "windowsmobile";
     private const string dargsBlackBerry = "blackberry";
     private const string dargsBlackBerryWebkit = "blackberrywebkit";
@@ -129,9 +137,13 @@ public class MDetectPage : System.Web.UI.Page
 
     private const string deviceAndroid = "ANDROID";
     private const string deviceGoogleTV = "GOOGLETV";
-    private const string deviceHtcFlyer = "HTC_FLYER"; //HTC Flyer
 
     private const string deviceNuvifone = "NUVIFONE";  //Garmin Nuvifone
+    private const string deviceBada = "BADA";  //Samsung's Bada OS    
+    private const string deviceTizen = "TIZEN";  //Tizen OS    
+    private const string deviceMeego = "MEEGO";  //Meego OS    
+    private const string deviceSailfish = "SAILFISH";  //Sailfish OS
+    private const string deviceUbuntu = "UBUNTU";  //Ubuntu Mobile OS
 
     private const string deviceSymbian = "SYMBIAN";
     private const string deviceS60 = "SERIES60";
@@ -140,6 +152,8 @@ public class MDetectPage : System.Web.UI.Page
     private const string deviceS90 = "SERIES90";
 
     private const string deviceWinPhone7 = "WINDOWS PHONE OS 7";
+    private const string deviceWinPhone8 = "WINDOWS PHONE 8";
+    private const string deviceWinPhone10 = "WINDOWS PHONE 10";
     private const string deviceWinMob = "WINDOWS CE";
     private const string deviceWindows = "WINDOWS";
     private const string deviceIeMob = "IEMOBILE";
@@ -147,6 +161,7 @@ public class MDetectPage : System.Web.UI.Page
     private const string enginePie = "WM5 PIE"; //An old Windows Mobile browser
 
     private const string deviceBB = "BLACKBERRY";
+    private const string deviceBB10 = "BB10"; //For the new BB 10 OS
     private const string vndRIM = "VND.RIM"; //Detectable when BB devices emulate IE or Firefox
     private const string deviceBBStorm = "BLACKBERRY95"; //Storm 1 and 2
     private const string deviceBBBold = "BLACKBERRY97"; //Bold 97x0 (non-touch)
@@ -158,7 +173,8 @@ public class MDetectPage : System.Web.UI.Page
     private const string deviceBBPlaybook = "PLAYBOOK"; //PlayBook tablet
 
     private const string devicePalm = "PALM";
-    private const string deviceWebOS = "WEBOS"; //For Palm's line of WebOS devices
+    private const string deviceWebOS = "WEBOS"; //For Palm devices
+    private const string deviceWebOStv = "WEB0S"; //For LG TVs
     private const string deviceWebOShp = "HPWOS"; //For HP's line of WebOS devices
 
     private const string engineBlazer = "BLAZER"; //Old Palm
@@ -177,12 +193,14 @@ public class MDetectPage : System.Web.UI.Page
     private const string deviceDanger = "DANGER";
     private const string deviceHiptop = "HIPTOP";
     private const string devicePlaystation = "PLAYSTATION";
+    private const string devicePlaystationVita = "VITA";
     private const string deviceNintendoDs = "NITRO";
     private const string deviceNintendo = "NINTENDO";
     private const string deviceWii = "WII";
     private const string deviceXbox = "XBOX";
     private const string deviceArchos = "ARCHOS";
 
+    private const string engineFirefox = "FIREFOX"; //For Firefox OS
     private const string engineOpera = "OPERA"; //Popular browser
     private const string engineNetfront = "NETFRONT"; //Common embedded OS browser
     private const string engineUpBrowser = "UP.BROWSER"; //common on some phones
@@ -195,6 +213,10 @@ public class MDetectPage : System.Web.UI.Page
     private const string mini = "MINI";  //Some mobile browsers put "mini" in their names.
     private const string mobile = "MOBILE"; //Some mobile browsers put "mobile" in their user agent private strings.
     private const string mobi = "MOBI"; //Some mobile browsers put "mobi" in their user agent private strings.
+
+    //Smart TV strings
+    private const string smartTV1 = "SMART-TV"; //Samsung Tizen smart TVs
+    private const string smartTV2 = "SMARTTV"; //LG WebOS smart TVs
 
     //Use Maemo, Tablet, and Linux to test for Nokia"s Internet Tablets.
     private const string maemo = "MAEMO";
@@ -339,12 +361,12 @@ public class MDetectPage : System.Web.UI.Page
                 this.OnDetectSymbianOS(this, mda);
             }
         }
-        if (this.DetectWindowsPhone7())
+        if (this.DetectWindowsPhone())
         {
-            mda = new MDetectArgs(dargsWindowsPhone7);
-            if (this.OnDetectWindowsPhone7 != null)
+            mda = new MDetectArgs(dargsWindowsPhone);
+            if (this.OnDetectWindowsPhone != null)
             {
-                this.OnDetectWindowsPhone7(this, mda);
+                this.OnDetectWindowsPhone(this, mda);
             }
         }
         if (this.DetectWindowsMobile())
@@ -589,11 +611,8 @@ public class MDetectPage : System.Web.UI.Page
         if ((useragent.IndexOf(deviceAndroid) != -1) ||
             DetectGoogleTV())
             return true;
-        //Special check for the HTC Flyer 7" tablet. It should report here.
-        if (useragent.IndexOf(deviceHtcFlyer) != -1)
-            return true;
-        else
-            return false;
+        
+        return false;
     }
     //Android delegate
     public delegate void DetectAndroidHandler(object page, MDetectArgs args);
@@ -606,18 +625,21 @@ public class MDetectPage : System.Web.UI.Page
     // Ignores tablets (Honeycomb and later).
     public bool DetectAndroidPhone()
     {
-        if (DetectAndroid() && 
-            (useragent.IndexOf(mobile) != -1))
-            return true;
-        //Special check for Android phones with Opera Mobile. They should report here.
-        if (DetectOperaAndroidPhone())
-            return true;
-        //Special check for the HTC Flyer 7" tablet. It should report here.
-        if (useragent.IndexOf(deviceHtcFlyer) != -1)
-            return true;
-        else
+        //First, let's make sure we're on an Android device.
+        if (!DetectAndroid())
             return false;
+
+        //If it's Android and has 'mobile' in it, Google says it's a phone.
+        if (useragent.IndexOf(mobile) != -1)
+            return true;
+
+        //Special check for Android devices with Opera Mobile/Mini. They should report here.
+        if (DetectOperaMobile())
+            return true;
+        
+        return false;
     }
+
     //Android Phone delegate
     public delegate void DetectAndroidPhoneHandler(object page, MDetectArgs args);
     public event DetectAndroidPhoneHandler OnDetectAndroidPhone;
@@ -631,11 +653,8 @@ public class MDetectPage : System.Web.UI.Page
         if (!DetectAndroid())
             return false;
 
-        //Special check for Opera Android Phones. They should NOT report here.
+        //Special check for Android devices with Opera Mobile/Mini. They should NOT report here.
         if (DetectOperaMobile())
-            return false;
-        //Special check for the HTC Flyer 7" tablet. It should NOT report here.
-        if (useragent.IndexOf(deviceHtcFlyer) != -1)
             return false;
 
         //Otherwise, if it's Android and does NOT have 'mobile' in it, Google says it's a tablet.
@@ -644,6 +663,7 @@ public class MDetectPage : System.Web.UI.Page
         else
             return true;
     }
+    
     //Android Tablet delegate
     public delegate void DetectAndroidTabletHandler(object page, MDetectArgs args);
     public event DetectAndroidTabletHandler OnDetectAndroidTablet;
@@ -731,6 +751,23 @@ public class MDetectPage : System.Web.UI.Page
 
     //**************************
     // Detects if the current browser is a 
+    // Windows Phone 7, 8, or 10 device.
+    public bool DetectWindowsPhone()
+    {
+        if (DetectWindowsPhone7() || 
+        	DetectWindowsPhone8() ||
+        	DetectWindowsPhone10)
+            return true;
+        
+        return false;
+    }
+
+    //WindowsPhone delegate
+    public delegate void DetectWindowsPhoneHandler(object page, MDetectArgs args);
+    public event DetectWindowsPhoneHandler OnDetectWindowsPhone;
+
+    //**************************
+    // Detects if the current browser is a 
     // Windows Phone 7 device.
     public bool DetectWindowsPhone7()
     {
@@ -740,18 +777,36 @@ public class MDetectPage : System.Web.UI.Page
             return false;
     }
 
-    //WindowsPhone7 delegate
-    public delegate void DetectWindowsPhone7Handler(object page, MDetectArgs args);
-    public event DetectWindowsPhone7Handler OnDetectWindowsPhone7;
+    //**************************
+    // Detects if the current browser is a 
+    // Windows Phone 8 device.
+    public bool DetectWindowsPhone8()
+    {
+        if (useragent.IndexOf(deviceWinPhone8) != -1)
+            return true;
+        else
+            return false;
+    }
+
+    //**************************
+    // Detects if the current browser is a 
+    // Windows Phone 10 device.
+    public bool DetectWindowsPhone10()
+    {
+        if (useragent.IndexOf(deviceWinPhone10) != -1)
+            return true;
+        else
+            return false;
+    }
 
     //**************************
     // Detects if the current browser is a Windows Mobile device.
-    // Excludes Windows Phone 7 devices. 
+    // Excludes Windows Phone devices. 
     // Focuses on Windows Mobile 6.xx and earlier.
     public bool DetectWindowsMobile()
     {
-        //Exclude new Windows Phone 7.
-        if (DetectWindowsPhone7())
+        //Exclude new Windows Phone.
+        if (DetectWindowsPhone())
             return false;
         //Most devices use 'Windows CE', but some report 'iemobile' 
         //  and some older ones report as 'PIE' for Pocket IE. 
@@ -793,6 +848,18 @@ public class MDetectPage : System.Web.UI.Page
     public delegate void DetectBlackBerryHandler(object page, MDetectArgs args);
     public event DetectBlackBerryHandler OnDetectBlackBerry;
 
+
+    //**************************
+    // Detects if the current browser is a BlackBerry 10 OS phone.
+   	// Excludes tablets.
+    public bool DetectBlackBerry10Phone()
+    {
+        if (useragent.IndexOf(deviceBB10) != -1 &&
+            useragent.IndexOf(mobile) != -1)
+            return true;
+        else
+            return false;
+    }
 
     //**************************
     // Detects if the current browser is on a BlackBerry tablet device.
@@ -935,6 +1002,41 @@ public class MDetectPage : System.Web.UI.Page
 
 
     //**************************
+    // Detects if the current browser is on a WebOS smart TV.
+    public bool DetectWebOSTV()
+    {
+        if (useragent.IndexOf(deviceWebOStv) != -1 &&
+            useragent.IndexOf(smartTV2) != -1)
+        {
+            return true;
+        }
+        else
+            return false;
+    }
+
+    //**************************
+    // Detects if the current browser is Opera Mobile or Mini.
+    public bool DetectOperaMobile()
+    {
+        if (useragent.IndexOf(engineOpera)!= -1)
+        {
+            if ((useragent.IndexOf(mini)!= -1) ||
+             (useragent.IndexOf(mobi)!= -1))
+            {
+                return true;
+            }
+            else
+                return false;
+        }
+        else
+            return false;
+    }
+
+    //Opera Mobile delegate
+    public delegate void DetectOperaMobileHandler(object page, MDetectArgs args);
+    public event DetectOperaMobileHandler OnDetectOperaMobile;
+
+    //**************************
     // Detects if the current browser is a
     //    Garmin Nuvifone.
     public bool DetectGarminNuvifone()
@@ -945,30 +1047,165 @@ public class MDetectPage : System.Web.UI.Page
             return false;
     }
 
-
     //**************************
-    // Check to see whether the device is any device
-    //   in the 'smartphone' category.
-    public bool DetectSmartphone()
+    // Detects a device running the Bada OS from Samsung.
+    public bool DetectBada()
     {
-        if (DetectIphoneOrIpod() ||
-            DetectAndroidPhone() ||
-            DetectS60OssBrowser() ||
-            DetectSymbianOS() ||
-            DetectWindowsMobile() ||
-            DetectWindowsPhone7() ||
-            DetectBlackBerry() ||
-            DetectPalmWebOS() ||
-            DetectPalmOS() ||
-            DetectGarminNuvifone())
+        if (useragent.IndexOf(deviceBada))
+        {
             return true;
+        }
         else
             return false;
     }
 
-    //DetectSmartphone delegate
-    public delegate void DetectSmartphoneHandler(object page, MDetectArgs args);
-    public event DetectSmartphoneHandler OnDetectSmartphone;
+    //**************************
+    // Detects a device running the Tizen smartphone OS.
+    public bool DetectTizen()
+    {
+        if (useragent.IndexOf(deviceTizen) != -1 &&
+            useragent.IndexOf(mobile) != -1)
+        {
+            return true;
+        }
+        else
+            return false;
+    }
+
+    //**************************
+    // Detects if the current browser is on a Tizen smart TV.
+    public bool DetectTizenTV()
+    {
+        if (useragent.IndexOf(deviceTizen) != -1 &&
+            useragent.IndexOf(smartTV1) != -1)
+        {
+            return true;
+        }
+        else
+            return false;
+    }
+
+    //**************************
+    // Detects a device running the Meego OS.
+    public bool DetectMeego()
+    {
+        if (useragent.IndexOf(deviceMeego))
+        {
+            return true;
+        }
+        else
+            return false;
+    }
+
+    //**************************
+    // Detects a phone running the Meego OS.
+    public bool DetectMeegoPhone()
+    {
+        if (useragent.IndexOf(deviceMeego) != -1 &&
+            useragent.IndexOf(mobie) != -1)
+        {
+            return true;
+        }
+        else
+            return false;
+    }
+
+    //**************************
+    // Detects a mobile device (probably) running the Firefox OS.
+    public bool DetectFirefoxOS()
+    {
+        if (DetectFirefoxOSPhone() || DetectFirefoxOSTablet())
+            return true;
+        
+        return false;
+    }
+
+    //**************************
+    // Detects a phone (probably) running the Firefox OS.
+    public bool DetectFirefoxOSPhone()
+    {
+        //First, let's make sure we're NOT on another major mobile OS.
+        if (DetectIos() || 
+        	DetectAndroid() ||
+        	DetectSailfish())
+            return false;        
+        
+        if ((useragent.IndexOf(engineFirefox) != -1) &&
+            (useragent.IndexOf(mobile) != -1))
+            return true;
+        
+        return false;
+    }
+
+    //**************************
+    // Detects a tablet (probably) running the Firefox OS.
+    public bool DetectFirefoxOSTablet()
+    {
+        //First, let's make sure we're NOT on another major mobile OS.
+        if (DetectIos() || 
+        	DetectAndroid() ||
+        	DetectSailfish())
+            return false;        
+        
+        if ((useragent.IndexOf(engineFirefox) != -1) &&
+            (useragent.IndexOf(deviceTablet) != -1))
+            return true;
+        
+        return false;
+    }
+
+    //**************************
+    // Detects a device running the Sailfish OS.
+    public bool DetectSailfish()
+    {
+        if (useragent.IndexOf(deviceSailfish) != -1)
+            return true;
+        else
+            return false;
+    }
+    
+    //**************************
+    // Detects a phone running the Sailfish OS.
+    public bool DetectSailfishPhone()
+    {
+        if (DetectSailfish() &&
+            (useragent.IndexOf(mobile) != -1))
+            return true;
+        
+        return false;
+    }
+
+    //**************************
+    // Detects a mobile device running the Ubuntu Mobile OS.
+    public bool DetectUbuntu()
+    {
+        if (DetectUbuntuPhone() || DetectUbuntuTablet())
+            return true;
+        
+        return false;
+    }
+
+    //**************************
+    // Detects a phone running the Ubuntu Mobile OS.
+    public bool DetectUbuntuPhone()
+    {
+        if ((useragent.IndexOf(deviceUbuntu) != -1) &&
+            (useragent.IndexOf(mobile) != -1))
+            return true;
+        
+        return false;
+    }
+
+    //**************************
+    // Detects a tablet running the Ubuntu Mobile OS.
+    public bool DetectUbuntuTablet()
+    {
+        if ((useragent.IndexOf(deviceUbuntu) != -1) &&
+            (useragent.IndexOf(deviceTablet) != -1))
+            return true;
+        
+        return false;
+    }
 
 
     //**************************
@@ -998,53 +1235,6 @@ public class MDetectPage : System.Web.UI.Page
     //DangerHiptop delegate
     public delegate void DetectDangerHiptopHandler(object page, MDetectArgs args);
     public event DetectDangerHiptopHandler OnDetectDangerHiptop;
-
-    //**************************
-    // Detects if the current browser is Opera Mobile or Mini.
-    public bool DetectOperaMobile()
-    {
-        if (useragent.IndexOf(engineOpera)!= -1)
-        {
-            if ((useragent.IndexOf(mini)!= -1) ||
-             (useragent.IndexOf(mobi)!= -1))
-            {
-                return true;
-            }
-            else
-                return false;
-        }
-        else
-            return false;
-    }
-
-    //Opera Mobile delegate
-    public delegate void DetectOperaMobileHandler(object page, MDetectArgs args);
-    public event DetectOperaMobileHandler OnDetectOperaMobile;
-
-    //**************************
-    // Detects if the current browser is Opera Mobile
-    // running on an Android phone.
-    public bool DetectOperaAndroidPhone()
-    {
-        if ((useragent.IndexOf(engineOpera) != -1) &&
-            (useragent.IndexOf(deviceAndroid) != -1) &&
-            (useragent.IndexOf(mobi) != -1))
-            return true;
-        else
-            return false;
-    }
-
-    // Detects if the current browser is Opera Mobile
-    // running on an Android tablet.
-    public bool DetectOperaAndroidTablet()
-    {
-        if ((useragent.IndexOf(engineOpera) != -1) &&
-            (useragent.IndexOf(deviceAndroid) != -1) &&
-            (useragent.IndexOf(deviceTablet) != -1))
-            return true;
-        else
-            return false;
-    }
 
     //**************************
     // Detects whether the device supports WAP or WML.
@@ -1090,60 +1280,22 @@ public class MDetectPage : System.Web.UI.Page
     }
 
     //**************************
-    //   Detects if the current device is a mobile device.
-    //   This method catches most of the popular modern devices.
-    //   Excludes Apple iPads and other modern tablets.
-    public bool DetectMobileQuick()
-    {
-        //Let's exclude tablets
-        if (DetectTierTablet())
-            return false;
-
-        //Most mobile browsing is done on smartphones
-        if (DetectSmartphone())
-            return true;
-
-        if (DetectWapWml() ||
-            DetectBrewDevice() ||
-            DetectOperaMobile())
-            return true;
-
-        if ((useragent.IndexOf(engineNetfront) != -1) ||
-            (useragent.IndexOf(engineUpBrowser)!= -1) ||
-            (useragent.IndexOf(engineOpenWeb)!= -1))
-            return true;
-
-        if (DetectDangerHiptop() ||
-            DetectMidpCapable() ||
-            DetectMaemoTablet() ||
-            DetectArchos())
-            return true;
-
-        if ((useragent.IndexOf(devicePda) != -1) &&
-            (useragent.IndexOf(disUpdate) < 0)) //no index found
-            return true;
-        if (useragent.IndexOf(mobile)!= -1)
-            return true;
-
-        //We also look for Kindle devices
-        if (DetectKindle() ||
-            DetectAmazonSilk())
-            return true;
-
-        else
-            return false;
-    }
-
-    //DetectMobileQuick delegate
-    public delegate void DetectMobileQuickHandler(object page, MDetectArgs args);
-    public event DetectMobileQuickHandler OnDetectMobileQuick;
-
-
-    //**************************
     // Detects if the current device is a Sony Playstation.
     public bool DetectSonyPlaystation()
     {
         if (useragent.IndexOf(devicePlaystation)!= -1)
+            return true;
+        else
+            return false;
+    }
+
+    //**************************
+    // Detects if the current device is a handheld gaming device with
+    // a touchscreen and modern iPhone-class browser. Includes the Playstation Vita.
+    public bool DetectGamingHandheld()
+    {
+        if (useragent.IndexOf(devicePlaystation)!= -1 &&
+             useragent.IndexOf(devicePlaystationVita)!= -1)
             return true;
         else
             return false;
@@ -1226,19 +1378,82 @@ public class MDetectPage : System.Web.UI.Page
     // Detects if the current browser is a Sony Mylo device.
     public bool DetectSonyMylo()
     {
-        if (useragent.IndexOf(manuSony)!= -1)
-        {
-            if ((useragent.IndexOf(qtembedded)!= -1) ||
-             (useragent.IndexOf(mylocom2)!= -1))
-            {
-                return true;
-            }
-            else
-                return false;
-        }
+        if ((useragent.IndexOf(manuSony)!= -1) &&
+        	((useragent.IndexOf(qtembedded)!= -1) ||
+             (useragent.IndexOf(mylocom2)!= -1)))
+			return true;        
+        
+        return false;
+    }
+
+	//*****************************
+	// Device Classes
+	//*****************************
+   
+    //**************************
+    // Check to see whether the device is any device
+    //   in the 'smartphone' category.
+    // Note: It's better to use DetectTierIphone() for modern touchscreen devices. 
+    public bool DetectSmartphone()
+    {
+        if (DetectTierIphone() ||
+            DetectS60OssBrowser() ||
+            DetectSymbianOS() ||
+            DetectWindowsMobile() ||
+            DetectBlackBerry() ||
+            DetectMeegoPhone() ||
+            DetectPalmOS())
+            return true;
         else
             return false;
     }
+
+    //DetectSmartphone delegate
+    public delegate void DetectSmartphoneHandler(object page, MDetectArgs args);
+    public event DetectSmartphoneHandler OnDetectSmartphone;
+
+    //**************************
+    //   Detects if the current device is a mobile device.
+    //   This method catches most of the popular modern devices.
+    //   Excludes Apple iPads and other modern tablets.
+    public bool DetectMobileQuick()
+    {
+        //Let's exclude tablets
+        if (DetectTierTablet())
+            return false;
+
+        //Most mobile browsing is done on smartphones
+        if (DetectSmartphone())
+            return true;
+
+        //Catch-all for many mobile devices
+        if (useragent.IndexOf(mobile) != -1)
+            return true;
+
+        if (DetectOperaMobile())
+            return true;
+        
+        //We also look for Kindle devices
+        if (DetectKindle() ||
+            DetectAmazonSilk())
+            return true;
+        
+        if (DetectWapWml() ||
+            DetectMidpCapable() ||
+            DetectBrewDevice())
+            return true;
+
+        if ((useragent.IndexOf(engineNetfront) != -1) ||
+            (useragent.IndexOf(engineUpBrowser) != -1)))
+            return true;
+
+        return false;
+    }
+
+    //DetectMobileQuick delegate
+    public delegate void DetectMobileQuickHandler(object page, MDetectArgs args);
+    public event DetectMobileQuickHandler OnDetectMobileQuick;
+
 
     //**************************
     // The longer and more thorough way to detect for a mobile device.
@@ -1251,29 +1466,32 @@ public class MDetectPage : System.Web.UI.Page
     {
         if (DetectMobileQuick())
             return true;
-        if (DetectGameConsole() ||
-            DetectSonyMylo())
+            
+        if (DetectGameConsole())
+            return true;
+
+        if (DetectDangerHiptop() ||
+            DetectMaemoTablet() ||
+            DetectSonyMylo() ||
+            DetectArchos())
+            return true;
+
+        if ((useragent.IndexOf(devicePda) != -1) &&
+            (useragent.IndexOf(disUpdate) != -1))
             return true;
 
         //Detect older phones from certain manufacturers and operators. 
-        if (useragent.IndexOf(uplink) != -1)
-            return true;
-        if (useragent.IndexOf(manuSonyEricsson) != -1)
-            return true;
-        if (useragent.IndexOf(manuericsson) != -1)
-            return true;
-        if (useragent.IndexOf(manuSamsung1) != -1)
-            return true;
-
-        if (useragent.IndexOf(svcDocomo) != -1)
-            return true;
-        if (useragent.IndexOf(svcKddi) != -1)
-            return true;
-        if (useragent.IndexOf(svcVodafone) != -1)
+        if ((useragent.IndexOf(uplink) != -1)  ||
+            (useragent.IndexOf(engineOpenWeb) != -1 ||
+            (useragent.IndexOf(manuSamsung1) != -1) ||
+            (useragent.IndexOf(manuSonyEricsson) != -1) ||
+            (useragent.IndexOf(manuericsson) != -1) ||
+            (useragent.IndexOf(svcDocomo) != -1) ||
+            (useragent.IndexOf(svcKddi) != -1) ||
+            (useragent.IndexOf(svcVodafone) != -1))
             return true;
 
-        else
-            return false;
+        return false;
     }
 
 
@@ -1292,6 +1510,8 @@ public class MDetectPage : System.Web.UI.Page
         if (DetectIpad()
             || DetectAndroidTablet()
             || DetectBlackBerryTablet()
+            || DetectFirefoxOSTablet()
+            || DetectUbuntuTablet()
             || DetectWebOSTablet())
             return true;
         else
@@ -1307,16 +1527,20 @@ public class MDetectPage : System.Web.UI.Page
     // The quick way to detect for a tier of devices.
     //   This method detects for devices which can 
     //   display iPhone-optimized web content.
-    //   Includes iPhone, iPod Touch, Android, Windows Phone 7, WebOS, etc.
+    //   Includes iPhone, iPod Touch, Android, Windows Phone, BB10, Playstation Vita, etc.
     public bool DetectTierIphone()
     {
         if (DetectIphoneOrIpod() ||
             DetectAndroidPhone() ||
-            (DetectBlackBerryWebKit() && 
-                DetectBlackBerryTouch()) ||
-            DetectWindowsPhone7() ||
+            DetectWindowsPhone() ||
+            DetectBlackBerry10Phone() ||
             DetectPalmWebOS() ||
-            DetectGarminNuvifone())
+            DetectBada() ||
+            DetectTizen() ||
+            DetectFirefoxOSPhone() ||
+            DetectSailfishPhone() ||
+            DetectUbuntuPhone() ||
+			DetectGamingHandheld())
             return true;
         else
             return false;
@@ -1398,7 +1622,11 @@ public class MDetectPage : System.Web.UI.Page
     protected override void OnInit(EventArgs e)
     {
         base.OnInit(e);
-        useragent = Request.ServerVariables["HTTP_USER_AGENT"].ToUpper();
-        httpaccept = Request.ServerVariables["HTTP_ACCEPT"].ToUpper();
+        
+        if (useragent == "" && httpaccept == "")
+        {
+            useragent = (Request.ServerVariables["HTTP_USER_AGENT"] ?? "").ToUpper();
+            httpaccept = (Request.ServerVariables["HTTP_ACCEPT"] ?? "").ToUpper();
+        }
     }
 }

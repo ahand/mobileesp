@@ -1,5 +1,5 @@
 ﻿/* *******************************************
-// Copyright 2010-2013, Anthony Hand
+// Copyright 2010-2015, Anthony Hand
 //
 // BETA NOTICE
 // Previous versions of the JavaScript code for MobileESP were 'regular' 
@@ -16,39 +16,42 @@
 // Please send feedback to project founder Anthony Hand: anthony.hand@gmail.com
 //
 //
-// File version 2013.01.05 (January 5, 2013)
-//	Updates:
-//	- Added support for Tizen: variable and DetectTizen().
-//	- Added support for Meego: variable and DetectMeego().
-//	- Added support for Windows Phone 8: variable and DetectWindowsPhone8().
-//	- Added a generic Windows Phone method: DetectWindowsPhone().
-//	- Added support for BlackBerry 10 OS: variable and DetectBlackBerry10Phone().
-//	- Added support for PlayStation Vita handheld: variable and DetectGamingHandheld().
-//	- Updated DetectTierIphone(). Added Tizen; updated the Windows Phone, BB10, and PS Vita support.
-//	- Updated DetectWindowsMobile(). Uses generic DetectWindowsPhone() method rather than WP7.
-//	- Updated DetectSmartphone(). Uses the IsTierIphone variable.
-//	- Updated DetectSonyMylo() with more efficient code.
-//	- Removed DetectGarminNuvifone() from DetectTierIphone(). How many are left in market in 2013? It is detected as a RichCSS Tier device.
+// File version 2015.05.13 (May 13, 2015)
+// Updates:
+//	- Moved MobileESP to GitHub. https://github.com/ahand/mobileesp
+//	- Opera Mobile/Mini browser has the same UA string on multiple platforms and doesn't differentiate phone vs. tablet. 
+//		- Removed DetectOperaAndroidPhone(). This method is no longer reliable. 
+//		- Removed DetectOperaAndroidTablet(). This method is no longer reliable. 
+//	- Added support for Windows Phone 10: variable and DetectWindowsPhone10()
+//	- Updated DetectWindowsPhone() to include WP10. 
+//	- Added support for Firefox OS.  
+//		- A variable plus DetectFirefoxOS(), DetectFirefoxOSPhone(), DetectFirefoxOSTablet()
+//		- NOTE: Firefox doesn't add UA tokens to definitively identify Firefox OS vs. their browsers on other mobile platforms.
+//	- Added support for Sailfish OS. Not enough info to add a tablet detection method at this time. 
+//		- A variable plus DetectSailfish(), DetectSailfishPhone()
+//	- Added support for Ubuntu Mobile OS. 
+//		- DetectUbuntu(), DetectUbuntuPhone(), DetectUbuntuTablet()
+//	- Added support for 2 smart TV OSes. They lack browsers but do have WebViews for use by HTML apps. 
+//		- One variable for Samsung Tizen TVs, plus DetectTizenTV()
+//		- One variable for LG WebOS TVs, plus DetectWebOSTV()
+//	- Updated DetectTizen(). Now tests for “mobile” to disambiguate from Samsung Smart TVs
+//	- Removed variables for obsolete devices: deviceHtcFlyer, deviceXoom.
+//	- Updated DetectAndroid(). No longer has a special test case for the HTC Flyer tablet. 
+//	- Updated DetectAndroidPhone(). 
+//		- Updated internal detection code for Android. 
+//		- No longer has a special test case for the HTC Flyer tablet. 
+//		- Checks against DetectOperaMobile() on Android and reports here if relevant. 
+//	- Updated DetectAndroidTablet(). 
+//		- No longer has a special test case for the HTC Flyer tablet. 
+//		- Checks against DetectOperaMobile() on Android to exclude it from here.
+//	- DetectMeego(): Changed definition for this method. Now detects any Meego OS device, not just phones. 
+//	- DetectMeegoPhone(): NEW. For Meego phones. Ought to detect Opera browsers on Meego, as well.  
+//	- DetectTierIphone(): Added support for phones running Sailfish, Ubuntu and Firefox Mobile. 
+//	- DetectTierTablet(): Added support for tablets running Ubuntu and Firefox Mobile. 
+//	- DetectSmartphone(): Added support for Meego phones. 
+//	- Reorganized DetectMobileQuick(). Moved the following to DetectMobileLong():
+//		- DetectDangerHiptop(), DetectMaemoTablet(), DetectSonyMylo(), DetectArchos()
 //       
-// File version 2012.07.22  (July 22, 2012)
-//	- Switched to an Object-Oriented programming model using the literal notation technique.  
-//	- NOTE: The literal notation technique allows only 1 instance of this object per web page.  
-//	- Named the JavaScript object "MobileEsp" rather than the old "mDetect."
-//	- Applied many small tweaks and a few refactorings. The most notable ones are listed here...
-//	- Added a variable for Obigo, an embedded browser. Added a lookup for Obigo to DetectMobileQuick().
-//	- Added global variables for quick access to these very useful Boolean values:
-//		- isWebkit, isMobilePhone, isIphone, isAndroid, isAndroidPhone, isTierTablet, isTierIphone, isTierRichCss, isTierGenericMobile
-//	- Updated & simplified DetectSonyMylo(). Updated the variable mylocom2's value to handle both versions. 
-//	- Removed the variable qtembedded, which was only used in Mylo and unnecessary.  
-//	- Simplified OperaMobile().  
-//	- Reorganized DetectMobileQuick().
-//	- Moved the following from DetectMobileQuick() to DetectMobileLong():
-//		- DetectDangerHiptop(), DetectMaemoTablet(), DetectGarminNuvifone(), devicePda  
-//	- Added DetectBada(). Added it to DetectSmartphone & iPhone Tier, too.
-//	- Updated DetectSymbian() to support Opera Mobile 10.
-//	- Removed variable for OpenWeb. Removed its detection from DetectMobileQuick().
-//		It's not clear whether Sprint is still using the OpenWeb transcoding service from OpenWave.
-//
 //
 //
 // LICENSE INFORMATION
@@ -67,7 +70,7 @@
 //   Project Owner: Anthony Hand
 //   Email: anthony.hand@gmail.com
 //   Web Site: http://www.mobileesp.com
-//   Source Files: http://code.google.com/p/mobileesp/
+//   Source Files: https://github.com/ahand/mobileesp
 //   
 //   Versions of this code are available for:
 //      PHP, JavaScript, Java, ASP.NET (C#), Ruby and others
@@ -114,11 +117,10 @@ var MobileEsp = {
 	
 	deviceAndroid : 'android',
 	deviceGoogleTV : 'googletv',
-	deviceXoom : 'xoom', //Motorola Xoom
-	deviceHtcFlyer : 'htc_flyer', //HTC Flyer
 	
 	deviceWinPhone7 : 'windows phone os 7', 
 	deviceWinPhone8 : 'windows phone 8', 
+	deviceWinPhone10 : 'windows phone 10', 
 	deviceWinMob : 'windows ce',
 	deviceWindows : 'windows',
 	deviceIeMob : 'iemobile',
@@ -145,13 +147,16 @@ var MobileEsp = {
 	deviceS90 : 'series90',
 
 	devicePalm : 'palm',
-	deviceWebOS : 'webos', //For Palm's line of WebOS devices
+	deviceWebOS : 'webos', //For Palm devices 
+	deviceWebOStv : 'web0s', //For LG TVs
 	deviceWebOShp : 'hpwos', //For HP's line of WebOS devices
 
 	deviceNuvifone : 'nuvifone', //Garmin Nuvifone
 	deviceBada : 'bada', //Samsung's Bada OS
 	deviceTizen : 'tizen', //Tizen OS
 	deviceMeego : 'meego', //Meego OS
+	deviceSailfish : 'sailfish', //Sailfish OS
+	deviceUbuntu : 'ubuntu', //Ubuntu Mobile OS
 
 	deviceKindle : 'kindle', //Amazon eInk Kindle
 	engineSilk : 'silk-accelerated', //Amazon's accelerated Silk browser for Kindle Fire
@@ -177,6 +182,7 @@ var MobileEsp = {
 	deviceXbox : 'xbox',
 	deviceArchos : 'archos',
 	
+	engineFirefox : 'firefox', //For Firefox OS
 	engineOpera : 'opera', //Popular browser
 	engineNetfront : 'netfront', //Common embedded OS browser
 	engineUpBrowser : 'up.browser', //common on some phones
@@ -190,6 +196,10 @@ var MobileEsp = {
 	mobile : 'mobile', //Some mobile browsers put 'mobile' in their user agent strings
 	mobi : 'mobi', //Some mobile browsers put 'mobi' in their user agent strings
 	
+	//Smart TV strings
+	smartTV1 : 'smart-tv', //Samsung Tizen smart TVs
+	smartTV2 : 'smarttv', //LG WebOS smart TVs
+
 	//Use Maemo, Tablet, and Linux to test for Nokia's Internet Tablets.
 	maemo : 'maemo',
 	linux : 'linux',
@@ -244,7 +254,7 @@ var MobileEsp = {
 	//**************************
 	// Detects if the current device is an iPhone.
 	DetectIphone : function() {
-                if (this.initCompleted || this.isIphone)
+        if (this.initCompleted || this.isIphone)
 			return this.isIphone;
 
 		if (this.uagent.search(this.deviceIphone) > -1)
@@ -310,11 +320,8 @@ var MobileEsp = {
 		
 		if ((this.uagent.search(this.deviceAndroid) > -1) || this.DetectGoogleTV())
 			return true;
-		//Special check for the HTC Flyer 7" tablet. It should report here.
-		if (this.uagent.search(this.deviceHtcFlyer) > -1)
-			return true;
-		else
-			return false;
+		
+		return false;
 	},
 
 	//**************************
@@ -326,16 +333,19 @@ var MobileEsp = {
 		if (this.initCompleted || this.isAndroidPhone)
 			return this.isAndroidPhone;
 		
-		if (this.DetectAndroid() && (this.uagent.search(this.mobile) > -1))
-			return true;
-		//Special check for Android phones with Opera Mobile. They should report here.
-		if (this.DetectOperaAndroidPhone())
-			return true;
-		//Special check for the HTC Flyer 7" tablet. It should report here.
-		if (this.uagent.search(this.deviceHtcFlyer) > -1)
-			return true;
-		else
+		//First, let's make sure we're on an Android device.
+		if (!this.DetectAndroid())
 			return false;
+		
+		//If it's Android and has 'mobile' in it, Google says it's a phone.
+		if (this.uagent.search(this.mobile) > -1)
+			return true;
+
+		//Special check for Android phones with Opera Mobile. They should report here.
+		if (this.DetectOperaMobile())
+			return true;
+		
+		return false;
 	},
 
 	//**************************
@@ -348,9 +358,6 @@ var MobileEsp = {
 		
 		//Special check for Opera Android Phones. They should NOT report here.
 		if (this.DetectOperaMobile())
-			return false;
-		//Special check for the HTC Flyer 7" tablet. It should NOT report here.
-		if (this.uagent.search(this.deviceHtcFlyer) > -1)
 			return false;
 			
 		//Otherwise, if it's Android and does NOT have 'mobile' in it, Google says it's a tablet.
@@ -394,19 +401,20 @@ var MobileEsp = {
 
 	//WINDOWS MOBILE AND PHONE
 
-        // Detects if the current browser is EITHER a 
-        // Windows Phone 7.x OR 8 device.
-        DetectWindowsPhone : function() {
+    // Detects if the current browser is a 
+    // Windows Phone 7, 8, or 10 device.
+    DetectWindowsPhone : function() {
 		if (this.DetectWindowsPhone7() ||
-                    this.DetectWindowsPhone8())
+            this.DetectWindowsPhone8() ||
+            this.DetectWindowsPhone10())
 			return true;
 		else
 			return false;
 	},
 
 	//**************************
-	// Detects a Windows Phone 7.x device (in mobile browsing mode).
-	DetectWindowsPhone7 : function() {
+	// Detects a Windows Phone 7 device (in mobile browsing mode).
+	DetectWindowsPhone7 : function() { 
 		if (this.uagent.search(this.deviceWinPhone7) > -1)
 			return true;
 		else
@@ -417,6 +425,15 @@ var MobileEsp = {
 	// Detects a Windows Phone 8 device (in mobile browsing mode).
 	DetectWindowsPhone8 : function() {
 		if (this.uagent.search(this.deviceWinPhone8) > -1)
+			return true;
+		else
+			return false;
+	},
+
+	//**************************
+	// Detects a Windows Phone 10 device (in mobile browsing mode).
+	DetectWindowsPhone10 : function() {
+		if (this.uagent.search(this.deviceWinPhone10) > -1)
 			return true;
 		else
 			return false;
@@ -623,6 +640,16 @@ var MobileEsp = {
 			return false;
 	},
 
+	//**************************
+	// Detects if the current browser is on a WebOS smart TV.
+	DetectWebOSTV : function() {
+		if (this.uagent.search(this.deviceWebOStv) > -1 &&
+			this.uagent.search(this.smartTV2) > -1)
+			return true;
+		else
+			return false;
+	},
+
 
 	//OPERA
 
@@ -634,30 +661,6 @@ var MobileEsp = {
 		if ((this.uagent.search(this.engineOpera) > -1) &&
 			((this.uagent.search(this.mini) > -1 ||
 			this.uagent.search(this.mobi) > -1)))
-			return true;
-		else
-			return false;
-	},
-
-	//**************************
-	// Detects if the current browser is Opera Mobile 
-	// running on an Android phone.
-	DetectOperaAndroidPhone : function () {
-		if ((this.uagent.search(this.engineOpera) > -1) &&
-			(this.uagent.search(this.deviceAndroid) > -1) &&
-			(this.uagent.search(this.mobi) > -1))
-			return true;
-		else
-			return false;
-	},
-
-	//**************************
-	// Detects if the current browser is Opera Mobile 
-	// running on an Android tablet.
-	DetectOperaAndroidTablet : function() {
-		if ((this.uagent.search(this.engineOpera) > -1) &&
-			(this.uagent.search(this.deviceAndroid) > -1) &&
-			(this.uagent.search(this.deviceTablet) > -1))
 			return true;
 		else
 			return false;
@@ -698,7 +701,7 @@ var MobileEsp = {
 	},
 
 	//**************************
-	// Detects a device running the Bada smartphone OS from Samsung.
+	// Detects a device running the Bada OS from Samsung.
 	DetectBada : function() {
 		if (this.uagent.search(this.deviceBada) > -1)
 			return true;
@@ -709,7 +712,18 @@ var MobileEsp = {
 	//**************************
 	// Detects a device running the Tizen smartphone OS.
 	DetectTizen : function() {
-		if (this.uagent.search(this.deviceTizen) > -1)
+		if (this.uagent.search(this.deviceTizen) > -1 &&
+			this.uagent.search(this.mobile) > -1)
+			return true;
+		else
+			return false;
+	},
+
+	//**************************
+	// Detects if the current browser is on a Tizen smart TV.
+	DetectTizenTV : function() {
+		if (this.uagent.search(this.deviceTizen) > -1 &&
+			this.uagent.search(this.smartTV1) > -1)
 			return true;
 		else
 			return false;
@@ -722,6 +736,105 @@ var MobileEsp = {
 			return true;
 		else
 			return false;
+	},
+
+	//**************************
+	// Detects a phone running the Meego OS.
+	DetectMeegoPhone : function() {
+		if (this.uagent.search(this.deviceMeego) > -1 &&
+			this.uagent.search(this.mobi) > -1)
+			return true;
+		else
+			return false;
+	},
+
+	//**************************
+	// Detects a mobile device (probably) running the Firefox OS.
+	DetectFirefoxOS : function() {
+		if (this.DetectFirefoxOSPhone() || this.DetectFirefoxOSTablet())
+			return true;
+		else
+			return false;
+	},
+
+	//**************************
+	// Detects a phone (probably) running the Firefox OS.
+	DetectFirefoxOSPhone : function() {
+		//First, let's make sure we're NOT on another major mobile OS.
+		if (this.DetectIos() || 
+			this.DetectAndroid() ||
+			this.DetectSailfish())
+			return false;    	  
+
+		if ((this.uagent.search(this.engineFirefox) > -1) && 
+			(this.uagent.search(this.mobile) > -1))
+			return true;
+		
+		return false;
+	},
+
+	//**************************
+	// Detects a tablet (probably) running the Firefox OS.
+	DetectFirefoxOSTablet : function() {
+		//First, let's make sure we're NOT on another major mobile OS.
+		if (this.DetectIos() || 
+			this.DetectAndroid() ||
+			this.DetectSailfish())
+			return false;    	  
+
+		if ((this.uagent.search(this.engineFirefox) > -1) && 
+			(this.uagent.search(this.deviceTablet) > -1))
+			return true;
+		
+		return false;
+	},
+
+	//**************************
+	// Detects a device running the Sailfish OS.
+	DetectSailfish : function() {
+		if (this.uagent.search(this.deviceSailfish) > -1)
+			return true;
+		else
+			return false;
+	},
+
+	//**************************
+	// Detects a phone running the Sailfish OS.
+	DetectSailfishPhone : function() {
+		if (this.DetectSailfish() && (this.uagent.search(this.mobile) > -1))
+			return true;
+		
+		return false;
+	},
+
+
+	//**************************
+	// Detects a mobile device running the Ubuntu Mobile OS.
+	DetectUbuntu : function() {
+		if (this.DetectUbuntuPhone() || this.DetectUbuntuTablet())
+			return true;
+		else
+			return false;
+	},
+
+	//**************************
+	// Detects a phone running the Ubuntu Mobile OS.
+	DetectUbuntuPhone : function() {
+		if ((this.uagent.search(this.deviceUbuntu) > -1) && 
+			(this.uagent.search(this.mobile) > -1))
+			return true;
+		
+		return false;
+	},
+
+	//**************************
+	// Detects a tablet running the Ubuntu Mobile OS.
+	DetectUbuntuTablet : function() {
+		if ((this.uagent.search(this.deviceUbuntu) > -1) && 
+			(this.uagent.search(this.deviceTablet) > -1))
+			return true;
+		
+		return false;
 	},
 
 	//**************************
@@ -752,10 +865,10 @@ var MobileEsp = {
 		if (this.uagent.search(this.maemo) > -1)
 			return true;
 		//For Nokia N810, must be Linux + Tablet, or else it could be something else.
-		if ((this.uagent.search(this.linux) > -1) 
-			&& (this.uagent.search(this.deviceTablet) > -1)
-			&& !this.DetectWebOSTablet()
-			&& !this.DetectAndroid())
+		if ((this.uagent.search(this.linux) > -1) && 
+			(this.uagent.search(this.deviceTablet) > -1) && 
+			this.DetectWebOSTablet() && 
+			!this.DetectAndroid())
 			return true;
 		else
 			return false;
@@ -793,7 +906,7 @@ var MobileEsp = {
 
 	//**************************
 	// Detects if the current device is a handheld gaming device with
-        // a touchscreen and modern iPhone-class browser. Includes the Playstation Vita.
+    // a touchscreen and modern iPhone-class browser. Includes the Playstation Vita.
 	DetectGamingHandheld : function() {
 		if ((this.uagent.search(this.devicePlaystation) > -1) &&
                    (this.uagent.search(this.devicePlaystationVita) > -1))
@@ -842,11 +955,12 @@ var MobileEsp = {
 	//   Note: It's better to use DetectTierIphone() for modern touchscreen devices. 
 	DetectSmartphone : function() {
 		//Exclude duplicates from TierIphone
-                if (this.DetectTierIphone() ||
-                        this.DetectS60OssBrowser() ||
+        if (this.DetectTierIphone() ||
+            this.DetectS60OssBrowser() ||
 			this.DetectSymbianOS() ||
 			this.DetectWindowsMobile() ||
 			this.DetectBlackBerry() ||
+			this.DetectMeegoPhone() ||
 			this.DetectPalmOS())
 			return true;
 		
@@ -870,20 +984,20 @@ var MobileEsp = {
 		if (this.DetectSmartphone())
 			return true;
 
-		//Catch all for many mobile devices
+		//Catch-all for many mobile devices
 		if (this.uagent.search(this.mobile) > -1)
 			return true;
 
+		if (this.DetectOperaMobile())
+			return true;
+
+		//We also look for Kindle devices
 		if (this.DetectKindle() ||
 			this.DetectAmazonSilk())
 			return true;
 
 		if (this.uagent.search(this.deviceMidp) > -1 ||
 			this.DetectBrewDevice())
-			return true;
-
-		if (this.DetectOperaMobile() ||
-			this.DetectArchos())
 			return true;
 
 		if ((this.uagent.search(this.engineObigo) > -1) ||
@@ -905,7 +1019,7 @@ var MobileEsp = {
 		if (this.DetectDangerHiptop() ||
 			this.DetectMaemoTablet() ||
 			this.DetectSonyMylo() ||
-			this.DetectGarminNuvifone())
+			this.DetectArchos())
 			return true;
 
 		if ((this.uagent.search(this.devicePda) > -1) &&
@@ -913,12 +1027,10 @@ var MobileEsp = {
 			return true;
 		
 		//Detect for certain very old devices with stupid useragent strings.
-		if (this.uagent.search(this.manuSamsung1) > -1 ||
-			this.uagent.search(this.manuSonyEricsson) > -1 || 
-			this.uagent.search(this.manuericsson) > -1)
-			return true;
-		
-		if ((this.uagent.search(this.svcDocomo) > -1) ||
+		if ((this.uagent.search(this.manuSamsung1) > -1) ||
+			(this.uagent.search(this.manuSonyEricsson) > -1) || 
+			(this.uagent.search(this.manuericsson) > -1) ||
+			(this.uagent.search(this.svcDocomo) > -1) ||
 			(this.uagent.search(this.svcKddi) > -1) ||
 			(this.uagent.search(this.svcVodafone) > -1))
 			return true;
@@ -942,6 +1054,8 @@ var MobileEsp = {
 		if (this.DetectIpad() ||
 			this.DetectAndroidTablet() ||
 			this.DetectBlackBerryTablet() ||
+			this.DetectFirefoxOSTablet() ||
+			this.DetectUbuntuTablet() ||
 			this.DetectWebOSTablet())
 			return true;
 		else
@@ -964,10 +1078,13 @@ var MobileEsp = {
 			this.DetectPalmWebOS() ||
 			this.DetectBada() ||
 			this.DetectTizen() ||
+			this.DetectFirefoxOSPhone() ||
+			this.DetectSailfishPhone() ||
+			this.DetectUbuntuPhone() ||
 			this.DetectGamingHandheld())
 			return true;
 
-               //Note: BB10 phone is in the previous paragraph
+        //Note: BB10 phone is in the previous paragraph
 		if (this.DetectBlackBerryWebKit() && this.DetectBlackBerryTouch())
 			return true;
 		
