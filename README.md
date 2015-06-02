@@ -73,6 +73,10 @@ This project maintains and extends the original code created in 2008 by Anthony 
 
 NOTE: The MobileESP project was previously hosted on the Google Code web site. Because Google closed down that site and there had been many user requests, MobileESP is now hosted with GitHub. 
 
+##YouTube Quick Talk Video
+MobileESP founder, Anthony Hand, gave a short 6 minute talk on the origin and basics of MobileESP at a Silicon Valley event in 2012. Check it out!
+<a href="https://youtu.be/F_mFNTbe9lQ">https://youtu.be/F_mFNTbe9lQ</a>
+
 
 ##License
 Apache v2.0. More info and the link to the Apache v2.0 license page in each code file. 
