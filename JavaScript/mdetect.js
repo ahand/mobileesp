@@ -1,4 +1,4 @@
-﻿/* *******************************************
+/* *******************************************
 // Copyright 2010-2015, Anthony Hand
 //
 // BETA NOTICE
@@ -254,10 +254,11 @@ var MobileEsp = {
 	//**************************
 	// Detects if the current device is an iPhone.
 	DetectIphone : function() {
+
         if (this.initCompleted || this.isIphone)
 			return this.isIphone;
 
-		if (this.uagent.search(this.deviceIphone) > -1)
+		if (!this.DetectWindowsPhone() && (this.uagent.search(this.deviceIphone) > -1))
 			{
 				//The iPad and iPod Touch say they're an iPhone! So let's disambiguate.
 				if (this.DetectIpad() || this.DetectIpod())
@@ -315,10 +316,11 @@ var MobileEsp = {
 	// Detects *any* Android OS-based device: phone, tablet, and multi-media player.
 	// Also detects Google TV.
 	DetectAndroid : function() {
+
 		if (this.initCompleted || this.isAndroid)
 			return this.isAndroid;
 		
-		if ((this.uagent.search(this.deviceAndroid) > -1) || this.DetectGoogleTV())
+		if (!this.DetectWindowsPhone() && ((this.uagent.search(this.deviceAndroid) > -1) || this.DetectGoogleTV()))
 			return true;
 		
 		return false;
@@ -1155,6 +1157,3 @@ var MobileEsp = {
 
 //Initialize the MobileEsp object
 MobileEsp.InitDeviceScan();
-
-
-
