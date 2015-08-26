@@ -765,7 +765,7 @@ public class MDetectControl : System.Web.UI.UserControl
     {
         if (DetectWindowsPhone7() || 
         	DetectWindowsPhone8() ||
-        	DetectWindowsPhone10)
+        	DetectWindowsPhone10())
             return true;
         
         return false;
@@ -1062,7 +1062,7 @@ public class MDetectControl : System.Web.UI.UserControl
     // Detects a device running the Bada OS from Samsung.
     public bool DetectBada()
     {
-        if (useragent.IndexOf(deviceBada))
+        if (useragent.IndexOf(deviceBada) != -1)
         {
             return true;
         }
@@ -1100,7 +1100,7 @@ public class MDetectControl : System.Web.UI.UserControl
     // Detects a device running the Meego OS.
     public bool DetectMeego()
     {
-        if (useragent.IndexOf(deviceMeego))
+        if (useragent.IndexOf(deviceMeego) != -1)
         {
             return true;
         }
@@ -1113,7 +1113,7 @@ public class MDetectControl : System.Web.UI.UserControl
     public bool DetectMeegoPhone()
     {
         if (useragent.IndexOf(deviceMeego) != -1 &&
-            useragent.IndexOf(mobie) != -1)
+            useragent.IndexOf(mobile) != -1)
         {
             return true;
         }
@@ -1218,9 +1218,9 @@ public class MDetectControl : System.Web.UI.UserControl
         return false;
     }
 
-    //DetectSmartphone delegate
-    public delegate void DetectSmartphoneHandler(object page, MDetectArgs args);
-    public event DetectSmartphoneHandler OnDetectSmartphone;
+    //DetectUbuntuTablet delegate
+    public delegate void DetectUbuntuTabletHandler(object page, MDetectArgs args);
+    public event DetectUbuntuTabletHandler OnDetectUbuntuTablet;
 
 
     //**************************
@@ -1462,7 +1462,7 @@ public class MDetectControl : System.Web.UI.UserControl
             return true;
 
         if ((useragent.IndexOf(engineNetfront) != -1) ||
-            (useragent.IndexOf(engineUpBrowser) != -1)))
+            (useragent.IndexOf(engineUpBrowser) != -1))
             return true;
 
         return false;
@@ -1500,7 +1500,7 @@ public class MDetectControl : System.Web.UI.UserControl
 
         //Detect older phones from certain manufacturers and operators. 
         if ((useragent.IndexOf(uplink) != -1)  ||
-            (useragent.IndexOf(engineOpenWeb) != -1 ||
+            (useragent.IndexOf(engineOpenWeb) != -1) ||
             (useragent.IndexOf(manuSamsung1) != -1) ||
             (useragent.IndexOf(manuSonyEricsson) != -1) ||
             (useragent.IndexOf(manuericsson) != -1) ||
