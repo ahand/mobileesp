@@ -1218,11 +1218,6 @@ public class MDetectControl : System.Web.UI.UserControl
         return false;
     }
 
-    //DetectUbuntuTablet delegate
-    public delegate void DetectUbuntuTabletHandler(object page, MDetectArgs args);
-    public event DetectUbuntuTabletHandler OnDetectUbuntuTablet;
-
-
     //**************************
     // Detects whether the device is a Brew-powered device.
     public bool DetectBrewDevice()
