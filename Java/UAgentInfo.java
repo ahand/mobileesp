@@ -20,7 +20,7 @@
 //	- Added support for 2 smart TV OSes. They lack browsers but do have WebViews for use by HTML apps. 
 //		- One variable for Samsung Tizen TVs, plus DetectTizenTV()
 //		- One variable for LG WebOS TVs, plus DetectWebOSTV()
-//	- Updated DetectTizen(). Now tests for “mobile” to disambiguate from Samsung Smart TVs
+//	- Updated DetectTizen(). Now tests for "mobile" to disambiguate from Samsung Smart TVs
 //	- Removed variables for obsolete devices: deviceHtcFlyer, deviceXoom.
 //	- Updated DetectAndroid(). No longer has a special test case for the HTC Flyer tablet. 
 //	- Updated DetectAndroidPhone(). 
