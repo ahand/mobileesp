@@ -1,6 +1,7 @@
 {
     "name": "ahand/mobileesp",
-    "description": "The MobileESP project provides web site developers an easy-to-use and lightweight API for detecting whether visitors are using a mobile device, and if so, what kind. The APIs provide simple boolean results ('true' or 'false') for identifying individual device categories (such as iPhone, BlackBerry, Android, and Windows Mobile), device capabilities (e.g., J2ME), and broad classes of devices, such as 'iPhone Tier' (iPhone/Android/Tizen) or 'Tablet Tier.'",
+    "description": "Since 2008, MobileESP provides web site developers an easy-to-use and lightweight API for detecting whether visitors are using a mobile device, and if so, what kind. The APIs provide simple boolean results ('true' or 'false') for identifying individual device categories (such as iPhone, BlackBerry, Android, and Windows Mobile), device capabilities (e.g., J2ME), and broad classes of devices, such as 'iPhone Tier' (iPhone/Android/Tizen) or 'Tablet Tier.' APIs are available in PHP, JavaScript, Java, C#, Ruby Python, and more.",
+    "keywords": ["mobile","mobile detect","mobile esp","mobile redirect","mobile view managing","mobile-detect","mobile detector","mobile device","detect iphone","detect ipad","detect tablet","detect android","mobiledetect","responsive web"],
     "authors": [
         {
             "name": "Anthony Hand",
