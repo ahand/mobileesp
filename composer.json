@@ -1,0 +1,20 @@
+{
+    "name": "ahand/mobileesp",
+    "description": "MobileESP",
+    "authors": [
+        {
+            "name": "Anthony Hand",
+            "email": "anthony.hand@gmail.com",
+            "role": "Maintainer"
+        }
+    ],
+    "homepage": "http://www.mobileesp.org",
+    "license": "Apache-2.0",
+    "support": {
+        "issues": "https://github.com/ahand/mobileesp/issues",
+        "source": "https://github.com/ahand/mobileesp/"
+    },
+    "autoload": {
+        "classmap": ["PHP"]
+    }
+}
