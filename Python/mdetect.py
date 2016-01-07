@@ -1,6 +1,10 @@
 # *******************************************
-# Copyright 2010-2015, Anthony Hand
+# Copyright 2010-2016, Anthony Hand
 #
+#
+# File version 2016.01.07 (May 13, 2015)
+# Updates:
+#	- Fixed an issue in the detectNintendo() method. It was detecting for 'Nintendo' 3 times. Restored checks for Wii and Nintendo DS. 
 #
 # File version 2015.05.13 (May 13, 2015)
 # Updates:
@@ -799,8 +803,8 @@ class UAgentInfo(object):
         Detects if the current device is a Nintendo game device.
         """
         return UAgentInfo.deviceNintendo in self.__userAgent \
-            or UAgentInfo.deviceNintendo in self.__userAgent \
-            or UAgentInfo.deviceNintendo in self.__userAgent
+            or UAgentInfo.deviceWii in self.__userAgent \
+            or UAgentInfo.deviceNintendoDs in self.__userAgent
 
     def detectXbox(self):
         """Return detection of Xbox
