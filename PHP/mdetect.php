@@ -1086,7 +1086,8 @@ class uagent_info
          return $this->isMobilePhone;
 
       //Let's exclude tablets
-      if ($this->isTierTablet == $this->true) 
+      // Jesse Heap Patch: Prior code was using $this->isTierTablet which isn't set when running this the first time.  Changed to DetectTierTablet which sets $this->isTierTablet
+      if ($this->DetectTierTablet() == $this->true) 
          return $this->false;
       
       //Most mobile browsing is done on smartphones
