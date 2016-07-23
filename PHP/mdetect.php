@@ -4,7 +4,7 @@
 // Copyright 2010-2015, Anthony Hand
 //
 //
-// File version 2015.05.13 (May 13, 2015)
+// File version 2016.07.23 (July 23, 2016)
 // Updates:
 //	- Moved MobileESP to GitHub. https://github.com/ahand/mobileesp
 //	- Opera Mobile/Mini browser has the same UA string on multiple platforms and doesn't differentiate phone vs. tablet. 
