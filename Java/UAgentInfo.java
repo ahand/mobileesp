@@ -307,7 +307,8 @@ public class UAgentInfo {
      */
     public boolean detectIphone() {
         // The iPad and iPod touch say they're an iPhone! So let's disambiguate.
-        if (userAgent.indexOf(deviceIphone) != -1 && 
+        if (!detectWindowsPhone10() &&
+                userAgent.indexOf(deviceIphone) != -1 && 
                 !detectIpad() && 
                 !detectIpod()) {
             return true;
@@ -369,8 +370,9 @@ public class UAgentInfo {
      * @return detection of an Android device
      */
     public boolean detectAndroid() {
-        if ((userAgent.indexOf(deviceAndroid) != -1) ||
-          detectGoogleTV()) 
+        if (!detectWindowsPhone10() &&
+            ((userAgent.indexOf(deviceAndroid) != -1) ||
+          detectGoogleTV())) 
             return true;
         
         return false;

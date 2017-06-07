@@ -279,7 +279,8 @@ class uagent_info
    // Detects if the current device is an iPhone.
    function DetectIphone()
    {
-      if ($this->initCompleted == $this->true ||
+      if (!($this->DetectWindowsPhone()) &&
+          $this->initCompleted == $this->true ||
           $this->isIphone == $this->true)
          return $this->isIphone;
       
@@ -347,7 +348,8 @@ class uagent_info
    // Also detects Google TV.
    function DetectAndroid()
    {
-      if ($this->initCompleted == $this->true ||
+      if (!($this->DetectWindowsPhone()) &&
+          $this->initCompleted == $this->true ||
           $this->isAndroid == $this->true)
          return $this->isAndroid;
 

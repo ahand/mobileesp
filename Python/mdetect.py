@@ -276,7 +276,8 @@ class UAgentInfo(object):
         Detects if the current device is an iPhone.
         """
         # The iPad and iPod touch say they're an iPhone! So let's disambiguate.
-        return UAgentInfo.deviceIphone in self.__userAgent \
+        return not self.detectWindowsPhone() \
+            and UAgentInfo.deviceIphone in self.__userAgent \
             and not self.detectIpad() \
             and not self.detectIpod()
 
@@ -319,7 +320,8 @@ class UAgentInfo(object):
         Detects *any* Android OS-based device: phone, tablet, and multi-media player.
         Also detects Google TV.
         """
-        if UAgentInfo.deviceAndroid in self.__userAgent \
+        if not self.detectWindowsPhone() \
+           and UAgentInfo.deviceAndroid in self.__userAgent \
            or self.detectGoogleTV():
             return True
 
