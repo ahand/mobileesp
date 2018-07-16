@@ -294,9 +294,10 @@ public:
       
       if (useragent.find( MobileESP::deviceIphone) != std::string::npos)
       {
-         //The iPad and iPod Touch say they're an iPhone. So let's disambiguate.
+         //The iPad, iPod Touch and Windows Phone 8 say they're an iPhone. So let's disambiguate.
          if (DetectIpad() == true ||
-             DetectIpod() == true)
+             DetectIpod() == true ||
+             DetectWindowsPhone8() == true)
             return false;
          //Yay! It's an iPhone!
          else
@@ -360,7 +361,9 @@ public:
           isAndroid == true)
          return isAndroid;
 
-      if ((useragent.find( MobileESP::deviceAndroid) != std::string::npos)
+      if (((useragent.find( MobileESP::deviceAndroid) != std::string::npos)
+          && (DetectWindowsPhone10() == false)
+          && (DetectWindowsPhone10() == false))
           || (DetectGoogleTV() == true))
          return true; 
          

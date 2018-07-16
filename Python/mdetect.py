@@ -275,10 +275,11 @@ class UAgentInfo(object):
 
         Detects if the current device is an iPhone.
         """
-        # The iPad and iPod touch say they're an iPhone! So let's disambiguate.
+        # The iPad, iPod touch and Windows Phone 8 say they're an iPhone! So let's disambiguate.
         return UAgentInfo.deviceIphone in self.__userAgent \
             and not self.detectIpad() \
-            and not self.detectIpod()
+            and not self.detectIpod() \
+            and not self.detectWindowsPhone8()
 
     def detectIpod(self):
         """Return detection of an iPod Touch
@@ -319,8 +320,10 @@ class UAgentInfo(object):
         Detects *any* Android OS-based device: phone, tablet, and multi-media player.
         Also detects Google TV.
         """
-        if UAgentInfo.deviceAndroid in self.__userAgent \
-           or self.detectGoogleTV():
+        if ((UAgentInfo.deviceAndroid in self.__userAgent) \
+                    and (not self.detectWindowsPhone10()) \
+                    and (not self.detectWindowsPhone8())) \
+                or self.detectGoogleTV():
             return True
 
         return False

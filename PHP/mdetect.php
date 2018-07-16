@@ -285,9 +285,10 @@ class uagent_info
       
       if (stripos($this->useragent, $this->deviceIphone) > -1)
       {
-         //The iPad and iPod Touch say they're an iPhone. So let's disambiguate.
+         //The iPad, iPod Touch and Windows Phone 8 say they're an iPhone. So let's disambiguate.
          if ($this->DetectIpad() == $this->true ||
-             $this->DetectIpod() == $this->true)
+             $this->DetectIpod() == $this->true ||
+             $this->DetectWindowsPhone8() == $this->true)
             return $this->false;
          //Yay! It's an iPhone!
          else
@@ -351,7 +352,9 @@ class uagent_info
           $this->isAndroid == $this->true)
          return $this->isAndroid;
 
-      if ((stripos($this->useragent, $this->deviceAndroid) > -1)
+      if (((stripos($this->useragent, $this->deviceAndroid) > -1)
+          && ($this->DetectWindowsPhone10() == $this->false)
+          && ($this->DetectWindowsPhone8() == $this->false))
           || ($this->DetectGoogleTV() == $this->true))
          return $this->true; 
       
