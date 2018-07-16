@@ -259,8 +259,8 @@ var MobileEsp = {
 
 		if (this.uagent.search(this.deviceIphone) > -1)
 			{
-				//The iPad and iPod Touch say they're an iPhone! So let's disambiguate.
-				if (this.DetectIpad() || this.DetectIpod())
+				//The iPad, iPod Touch and Windows Phone 8 say they're an iPhone! So let's disambiguate.
+				if (this.DetectIpad() || this.DetectIpod() || this.DetectWindowsPhone8())
 					return false;
 				//Yay! It's an iPhone!
 				else 
@@ -318,7 +318,10 @@ var MobileEsp = {
 		if (this.initCompleted || this.isAndroid)
 			return this.isAndroid;
 		
-		if ((this.uagent.search(this.deviceAndroid) > -1) || this.DetectGoogleTV())
+		if (((this.uagent.search(this.deviceAndroid) > -1)
+				&& !DetectWindowsPhone10()
+				&& !DetectWindowsPhone8())
+				|| this.DetectGoogleTV())
 			return true;
 		
 		return false;

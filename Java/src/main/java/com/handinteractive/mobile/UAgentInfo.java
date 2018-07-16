@@ -306,10 +306,11 @@ public class UAgentInfo {
      * @return detection of an iPhone
      */
     public boolean detectIphone() {
-        // The iPad and iPod touch say they're an iPhone! So let's disambiguate.
-        if (userAgent.indexOf(deviceIphone) != -1 && 
+        // The iPad, iPod Touch and Windows Phone 8 say they're an iPhone! So let's disambiguate.
+        if (userAgent.indexOf(deviceIphone) != -1 &&
                 !detectIpad() && 
-                !detectIpod()) {
+                !detectIpod() &&
+                !detectWindowsPhone8()) {
             return true;
         }
         return false;
@@ -344,7 +345,8 @@ public class UAgentInfo {
      */
     public boolean detectIphoneOrIpod() {
         //We repeat the searches here because some iPods may report themselves as an iPhone, which would be okay.
-        if (userAgent.indexOf(deviceIphone) != -1
+        if ((userAgent.indexOf(deviceIphone) != -1
+                    && !detectWindowsPhone8())
                 || userAgent.indexOf(deviceIpod) != -1) {
             return true;
         }
@@ -369,8 +371,10 @@ public class UAgentInfo {
      * @return detection of an Android device
      */
     public boolean detectAndroid() {
-        if ((userAgent.indexOf(deviceAndroid) != -1) ||
-          detectGoogleTV()) 
+        if ((userAgent.indexOf(deviceAndroid) != -1
+                    && !detectWindowsPhone10()
+                    && !detectWindowsPhone8())
+                || detectGoogleTV())
             return true;
         
         return false;
@@ -414,7 +418,7 @@ public class UAgentInfo {
             return false;
     
         //Otherwise, if it's Android and does NOT have 'mobile' in it, Google says it's a tablet.
-        if ((userAgent.indexOf(mobile) > -1)) 
+        if ((userAgent.indexOf(mobile) > -1))
             return false;
         else 
 			return true;
@@ -546,10 +550,9 @@ public class UAgentInfo {
         //  and some older ones report as 'PIE' for Pocket IE.
         //  We also look for instances of HTC and Windows for many of their WinMo devices.
         if (userAgent.indexOf(deviceWinMob) != -1
-                || userAgent.indexOf(deviceWinMob) != -1
                 || userAgent.indexOf(deviceIeMob) != -1
                 || userAgent.indexOf(enginePie) != -1
-                || (userAgent.indexOf(manuHtc) != -1 && userAgent.indexOf(deviceWindows) != -1) 
+                || (userAgent.indexOf(manuHtc) != -1 && userAgent.indexOf(deviceWindows) != -1)
                 || (detectWapWml() && userAgent.indexOf(deviceWindows) != -1)) {
             return true;
         }
@@ -568,8 +571,8 @@ public class UAgentInfo {
      * @return detection of Blackberry
      */
     public boolean detectBlackBerry() {
-        if (userAgent.indexOf(deviceBB) != -1 || 
-			httpAccept.indexOf(vndRIM) != -1) 
+        if (userAgent.indexOf(deviceBB) != -1 ||
+			httpAccept.indexOf(vndRIM) != -1)
             return true;
         
         if (detectBlackBerry10Phone())
@@ -584,7 +587,7 @@ public class UAgentInfo {
      * @return detection of a Blackberry 10 device
      */
     public boolean detectBlackBerry10Phone() {
-        if (userAgent.indexOf(deviceBB10) != -1 && 
+        if (userAgent.indexOf(deviceBB10) != -1 &&
 			userAgent.indexOf(mobile) != -1) {
             return true;
         }
@@ -714,7 +717,7 @@ public class UAgentInfo {
      * @return detection of an HP WebOS tablet
      */
     public boolean detectWebOSTablet() {
-        if (userAgent.indexOf(deviceWebOShp) != -1 && 
+        if (userAgent.indexOf(deviceWebOShp) != -1 &&
                 userAgent.indexOf(deviceTablet) != -1) {
             return true;
         }
@@ -726,7 +729,7 @@ public class UAgentInfo {
      * @return detection of a WebOS smart TV
      */
     public boolean detectWebOSTV() {
-        if (userAgent.indexOf(deviceWebOStv) != -1 && 
+        if (userAgent.indexOf(deviceWebOStv) != -1 &&
                 userAgent.indexOf(smartTV2) != -1) {
             return true;
         }

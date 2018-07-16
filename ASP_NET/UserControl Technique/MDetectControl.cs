@@ -534,8 +534,8 @@ public class MDetectControl : System.Web.UI.UserControl
     {
         if (useragent.IndexOf(deviceIphone)!= -1)
         {
-            //The iPad and iPod touch say they're an iPhone! So let's disambiguate.
-            if (DetectIpad() || DetectIpod())
+            //The iPad, iPod Touch and Windows Phone 8 say they're an iPhone! So let's disambiguate.
+            if (DetectIpad() || DetectIpod() || DetectWindowsPhone8())
             {
                 return false;
             }
@@ -615,8 +615,10 @@ public class MDetectControl : System.Web.UI.UserControl
     // Also detects Google TV.
     public bool DetectAndroid()
     {
-        if ((useragent.IndexOf(deviceAndroid) != -1) ||
-            DetectGoogleTV())
+        if (((useragent.IndexOf(deviceAndroid) != -1)
+                && !DetectWindowsPhone10()
+                && !DetectWindowsPhone8())
+                || DetectGoogleTV())
             return true;
         
         return false;
